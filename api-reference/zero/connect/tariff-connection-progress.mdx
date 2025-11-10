@@ -1,0 +1,70 @@
+---
+title: 'Pending tariff connection'
+icon: 'hourglass-start'
+sidebarTitle: "10. Pending connection"
+description: Informs customer that tariff connection is in progress.
+---
+
+Connect will return this page if it cannot instantly access the customer’s tariff, such as during a provider's system outage.
+
+**Page actions explained**:
+
+| Action          | Result                                                                       |
+| --------------- | ------------ |
+| `SAVE`          | Saves tariff configuration and closes the page. Connect will continue to try to connect the tariff in the background. |
+| `DISCONNECT`    | Disconnects the pending tariff and enables the customer to go through the Connect flow again. |
+| `DISMISS_DIRECT`| Disconnects the pending tariff and automatically skips the DIRECT option when the customer selects their provider. |
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/11-tariff-summary-pending.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_tariff_inprogress",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "SAVE",
+    "DISCONNECT",
+    "DISMISS_DIRECT"
+  ],
+  "data": {
+    "connection_type": "DIRECT",
+    "provider": {
+      "id": "prv_65b78bbdd8e83b06a60e38c2",
+      "display_name": "Octopus Energy",
+      "logo_url": "https://s.flatpeak.com/83b06a60e38c2.png"
+    }
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_tariff_inprogress",
+  "action": "SAVE"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code         | Error Description                     |
+| ------------------ | ------------------------------------- |
+| `action_missing`   | Action parameter is required.         |
+| `action_invalid`   | Action parameter XX is not supported. |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>
+
+<Note>When a customer clicks **Save**, Connect will immediately complete the session, and you can obtain the Location ID. However, Tariff Rates and other API endpoints will return `error 422` ("code": "pending_connect") until Flatpeak's backend systems can access the tariff; this can happen in a minute, an hour, or a day. If the tariff cannot be accessed for over 48 hours, Flatpeak systems will [send a webhook](/guides/connect/lifecycle) `tariff.fetch.failed`</Note>

@@ -1,0 +1,134 @@
+---
+title: Markets Coverage
+sidebarTitle: "Energy markets"
+---
+
+Flatpeak enables you to access accurate information about your customer's tariff when it is linked to wholesale electricity market rates.
+
+## Coverage
+
+European markets are included as standard:
+
+| Market                                            | Countries |
+| :-------------------------------------------------|:----------|
+| [Nord&nbsp;Pool](https://www.nordpoolgroup.com/)  | Austria, Belgium, Bulgaria, Denmark, Estonia, Finland, France, Germany, Latvia, Lithuania, Luxembourg, Netherlands, Norway, Poland, Romania, Sweden, United Kingdom |
+| [GME](https://www.mercatoelettrico.org/)          | Italy, Sardinia, Sicily |      
+| [OMIE](https://www.omie.es)                       | Spain                   |
+| [OMIP](https://www.omip.pt)                       | Portugal                |   
+| [EPEX](https://www.epexspot.com)                  | Germany, Switzerland    |
+
+Markets available on-demand (contact [support](https://flatpeak.com/support) to gain access):
+
+| Market                                      | Countries       |
+| :-------------------------------------------|:----------------|
+| [AEMO](https://www.aemo.com.au)             | Australia      |
+| [JEPX](https://www.jepx.jp)                 | Japan           |      
+| [OKTE](https://www.okte.sk)                 | Slovakia        |
+| [CROPEX](https://www.cropex.hr)             | Croatia         |   
+| [IBEX](https://ibex.bg)                     | Bulgaria        |
+| [OREE](https://www.oree.com.ua)             | Ukraine         |
+| [South Pool](https://www.bsp-southpool.com) | Slovenia        |
+| [HUPX](https://hupx.hu)                     | Hungary         |
+| [OTE](https://www.ote-cr.cz)                | Czech Republic  |
+| [SELECTRA](https://selectra.ie)             | Ireland         |
+| [PJM Interconnection](https://www.pjm.com)                       | United States   |
+| [Midcontinent Independent System Operator (MISO)](https://www.misoenergy.org/)   | United States   |
+| [Electric Reliability Council of Texas (ERCOT)](https://www.ercot.com) | United States   |
+| [Southwest Power Pool (SPP)](https://www.spp.org)     | United States   |
+| [Southern Company Balancing Authority](https://www.southerncompany.com/)   | United States   |
+
+
+## Automatic mapping
+
+When you [create a location](/api-reference/zero/locations/create-a-location) or [a new token for Connect](/api-reference/zero/connect/create-a-connect-token), we ask you to provide the full postal address of your customer's location. We use this information to automatically map it to their market rate region. Within Flatpeak, this region is represented by a `market_rates_source` ID that you can find via the [audit tariff rates](/api-reference/zero/tariffs/audit-tariff-rates) endpoint.
+
+```json example truncated audit object {5}
+{
+  "id": "tra_65e42cdd73e9f861edda35d7",
+  "object": "tariff_rate_audit",
+  "market_sources": [
+    "mrs_65792b4df61b16685ebd2e78"
+  ]
+}
+```
+
+## Flatpeak IDs for standard regions
+
+Refer to the table below for how the `market_rates_source` import ID maps to market regions:
+
+| Market Rates ID                 |Country       |Region                |Market  |
+|:--------------------------------|:-------------|:---------------------|:-------|
+|`mrs_65792b4ef61b16685ebd2ebf`   |Austria       |AT                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2ec1`   |Belgium       |BE                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2e94`   |Switzerland   |CH                    |epex    |
+|`mrs_66798016c0d13b149391f8e5`   |Germany       |GER                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2ea9`   |Denmark       |DK1                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2eab`   |Denmark       |DK2                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2eb9`   |Estonia       |EE                    |nordpool|
+|`mrs_65792b4df61b16685ebd2e77`   |Spain         |ES                    |omie    |
+|`mrs_666626e2a58c91c273c9c76c`   |Spain         |PENINSULAR            |omie    |
+|`mrs_666626e2a58c91c273c9c76e`   |Spain         |CANARIAS              |omie    |
+|`mrs_666626e2a58c91c273c9c770`   |Spain         |BALEARES              |omie    |
+|`mrs_666626e2a58c91c273c9c772`   |Spain         |CEUTA                 |omie    |
+|`mrs_666626e2a58c91c273c9c774`   |Spain         |MELILLA               |omie    |
+|`mrs_666626e2a58c91c273c9c776`   |Spain         |ANDALUCIA             |omie    |
+|`mrs_666626e2a58c91c273c9c778`   |Spain         |ARAGON                |omie    |
+|`mrs_666626e2a58c91c273c9c77a`   |Spain         |CANTABRIA             |omie    |
+|`mrs_666626e2a58c91c273c9c77c`   |Spain         |CASTILLA_LA_MANCHA    |omie    |
+|`mrs_666626e2a58c91c273c9c77e`   |Spain         |CASTILLA_Y_LEON       |omie    |
+|`mrs_666626e2a58c91c273c9c780`   |Spain         |CATALUNA              |omie    |
+|`mrs_666626e2a58c91c273c9c782`   |Spain         |PAIS_VASCO            |omie    |
+|`mrs_666626e2a58c91c273c9c784`   |Spain         |PRINCIPADO_DE_ASTURIAS|omie    |
+|`mrs_666626e2a58c91c273c9c786`   |Spain         |COMUNIDAD_DE_CEUTA    |omie    |
+|`mrs_666626e2a58c91c273c9c788`   |Spain         |COMUNIDAD_DE_MELILLA  |omie    |
+|`mrs_666626e2a58c91c273c9c78a`   |Spain         |COMUNIDAD_DE_MADRID   |omie    |
+|`mrs_666626e2a58c91c273c9c78c`   |Spain         |COMUNIDAD_DE_NAVARRA  |omie    |
+|`mrs_666626e2a58c91c273c9c78e`   |Spain         |COMUNIDAD_VALENCIANA  |omie    |
+|`mrs_666626e2a58c91c273c9c790`   |Spain         |EXTREMADURA           |omie    |
+|`mrs_666626e2a58c91c273c9c792`   |Spain         |GALICIA               |omie    |
+|`mrs_666626e2a58c91c273c9c794`   |Spain         |ISLAS_BALEARES        |omie    |
+|`mrs_666626e2a58c91c273c9c796`   |Spain         |ISLAS_CANARIAS        |omie    |
+|`mrs_666626e2a58c91c273c9c798`   |Spain         |LA_RIOJA              |omie    |
+|`mrs_666626e2a58c91c273c9c79a`   |Spain         |REGION_DE_MURCIA      |omie    |
+|`mrs_65792b4ef61b16685ebd2ea7`   |Finland       |FI                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2e8c`   |France        |CORS (Corsica   )     |gme     |
+|`mrs_65792b4ef61b16685ebd2ec5`   |France        |FR                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2ec9`   |United Kingdom|GB                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2e90`   |Greece        |GREC                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e7c`   |Italy         |CNOR                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e80`   |Italy         |NORD                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e7e`   |Italy         |CSUD                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e82`   |Italy         |SARD                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e84`   |Italy         |SICI                  |gme     |
+|`mrs_65792b4ef61b16685ebd2e86`   |Italy         |SUD                   |gme     |
+|`mrs_65792b4ef61b16685ebd2ebd`   |Lithuania     |LT                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2ebb`   |Latvia        |LV                    |nordpool|
+|`mrs_65792b4ef61b16685ebd2e98`   |Malta         |MALT                  |gme     |
+|`mrs_65792b4ef61b16685ebd2ec7`   |Netherlands   |NL                    |nordpool|
+|`mrs_66c3c4b54bbcdce07b8a9662`   |Norway        |NO1 (Oslo)            |nordpool|
+|`mrs_66c3c4b54bbcdce07b8a9664`   |Norway        |NO2 (Kristiansand)    |nordpool|
+|`mrs_66c3c4b54bbcdce07b8a9666`   |Norway        |NO3 (Trondheim)       |nordpool|
+|`mrs_66c3c4b54bbcdce07b8a9668`   |Norway        |NO4 (Tromso)          |nordpool|
+|`mrs_66c3c4b54bbcdce07b8a966a`   |Norway        |NO5 (Bergen)          |nordpool|
+|`mrs_68e3afa7a51a38aeb8a40f60`   |Poland        |PL                    |nordpool|
+|`mrs_65792b4df61b16685ebd2e79`   |Portugal      |PT                    |omie    |
+|`mrs_65792b4ef61b16685ebd2e9f`   |Sweden        |SE1                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2ea1`   |Sweden        |SE2                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2ea3`   |Sweden        |SE3                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2ea5`   |Sweden        |SE4                   |nordpool|
+|`mrs_65792b4ef61b16685ebd2e92`   |Slovenia      |SLOV                  |gme     |
+
+## Flatpeak IDs for on-demand regions 
+
+|Market Rates ID                  |Country        |Region                |Market  |
+|:--------------------------------|:-------------|:---------------------|:-------|
+|`mrs_68f16ac2706b1a97a28a99b6`   |Australia      |AU                    |aemo    |
+|`mrs_68f16acb4d63cb6d3eb97d3e`   |Japan          |JP                    |jpex    |
+|`mrs_68f16ad713c2dfe95b0b87e5`   |Slovakia       |HR                    |okte    |
+|`mrs_68f16ae2739297c63d8cf26a`   |Croatia        |CR                    |cropex  |
+|`mrs_68f16aeb830b11e57198c8fa`   |Bulgaria       |SLOV                  |ibex    |
+|`mrs_68f16b02a18d079473d2cc4e`   |Ukraine        |UA                    |oree    |
+|`mrs_68f16b0a219ad574d7a443e4`   |Slovenia       |SI                    |southpool |
+|`mrs_68f16b1266aaf3e8ee19eadb`   |Hungary        |HU                    |hupx    |
+|`mrs_68f16b1a9300a18b45ba73d7`   |Czech Republic |CZ                    |ote     |
+|`mrs_68f16b220d344bb5573dd8bf`   |Ireland        |ie                    |selectra  |

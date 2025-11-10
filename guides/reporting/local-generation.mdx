@@ -1,0 +1,63 @@
+---
+title: Accounting local (solar) generation
+sidebarTitle: "Local solar"
+---
+
+When you’re scheduling energy consumption or exports, it’s essential to account for local generation—like a PV array or wind turbine. Flatpeak lets you submit both forecasted and actual local generation data. These records can feed into:
+
+- Energy scheduling endpoints (for forward planning)
+- Cost reporting endpoints
+
+To track this, set the `tariff_rate` field to `LOCAL` when submitting metering data in either [instant](/guides/reporting/instant) or [aggregated](/guides/reporting/aggregated) cost reporting use case.
+
+## Forecast generation
+
+Use this to help Flatpeak plan ahead:
+
+- Submit expected generation via [interval](/api-reference/zero/meters/submit-interval-meter-records) or [cumulative](/api-reference/zero/meters/submit-cumulative-meter-records) metering endpoints.
+- Set the confidence parameter to anything less than 1.
+
+```json Example request highlight={10}
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[
+  {
+    "location_id": "loc_641b90b758fb8e6293716e40",
+    "direction": "IMPORT",
+    "tariff_rate": "LOCAL",
+    "confidence": 0.9,
+    "units": "W",
+    "value": 968,
+    "start_time": "2025-08-01T10:30:00Z",
+    "end_time": "2025-08-01T11:00:00Z",
+  }
+]'
+```
+
+## Actual generation
+
+Use this to log real production data:
+
+- Submit actual generation to the same endpoints.
+- Set `confidence` to 1 — this will overwrite any previously submitted records for the same period.
+
+```json Example request highlight={10}
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[
+  {
+    "location_id": "loc_641b90b758fb8e6293716e40",
+    "direction": "IMPORT",
+    "tariff_rate": "LOCAL",
+    "confidence": 1,
+    "units": "W",
+    "value": 1014,
+    "start_time": "2025-08-01T10:30:00Z",
+    "end_time": "2025-08-01T11:00:00Z"
+  }
+]'
+```

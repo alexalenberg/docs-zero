@@ -1,0 +1,103 @@
+---
+title: 'Provider login redirect'
+icon: 'link-simple'
+sidebarTitle: "3. Provider login"
+description: Connect instructs you to redirect the customer to an external page.
+---
+
+When customer selects a provider with a DIRECT integration, Connect will instruct you to redirect the customer to an external page where they will login to their provider's online dashboard and provide consent for your application to access their tariff.
+
+<Steps>
+<Step title="Handling Redirect">
+Connect will respond with the `session_redirect` route.
+
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "session_redirect",
+  "live_mode": false,
+  "data": {
+    "redirect_url": "https://british-gas-uk.connect.flatpeak.com"
+  }
+}
+```
+</CodeGroup>
+You will redirect the session to `redirect_url` via HTTP-GET, appending `connect_token`.
+```http Example redirect (http)
+GET /?fp_cot=cot_6587fa4362341be5b524de3b HTTP/1.1
+Host: british-gas-uk.connect.flatpeak.com
+```
+<Note>You can append any other query parameter to redirect, for example, your internal session or a security key. They will be returned to you via callback later.</Note>
+</Step>
+
+<Step title="Handling Callback">
+Once you redirect the customer's session to `redirect_url`, you will soon receive a callback to the URI you specified when you created the `connect_token` via the API. It will have the same query params and payload that you appended to the original redirect.
+
+POST your response to Connect via `session_restore` route:
+
+<CodeGroup>
+```http Example callback
+myapp://oauth-callback/flatpeak?fp_cot=cot_6587fa4362341be5b524de3b
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "session_restore",
+}'
+```
+</CodeGroup>
+</Step>
+</Steps>
+
+**Your customer's experience with redirects**
+
+Your customer will likely interact with only two pages - `Login` and `Consent`.
+
+However, depending on how the provider implements the login process, the configuration of their account (such as having multiple properties supplied under one contract) and other factors, they may be presented with additional pages:
+
+<Tabs>
+<Tab title="Login">
+<Frame>
+  <img src="/images/Direct Login.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Retry">
+<Frame>
+  <img src="/images/Direct Retry.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="OTP">
+<Frame>
+  <img src="/images/Direct OTP.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="No tariff">
+<Frame>
+  <img src="/images/Direct No Fariff Found.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Multi addresses">
+<Frame>
+  <img src="/images/Direct Multiaddress.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Consent">
+<Frame>
+  <img src="/images/Direct Consent.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+</Tabs>
+
+<Note>The actual look and feel may vary between providers as they develop and host the pages. The word [Brand] will always be replaced with your business name.</Note>
+
+**UI integration tip**
+
+When redirecting to an external page, use a modal or a sheet [iOS](https://developer.apple.com/design/human-interface-guidelines/sheets), [Android](https://m3.material.io/components/bottom-sheets/guidelines) to avoid layout issues—especially on devices with camera notches or cutouts.
+This ensures a clean, contained user experience without UI elements being obscured.
+<Frame>
+  <img src="/images/modal.png" style={{ width: "250px" }} />
+</Frame>

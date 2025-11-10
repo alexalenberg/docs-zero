@@ -1,0 +1,66 @@
+---
+title: Service Level Agreement
+description: 'Effective date: 22 February 2022'
+---
+
+<Info>Below Service Level Agreement will be archived on 15 April 2025</Info>
+
+<Warning>Unless expressly agreed otherwise in writing, [current Service Level Agreement](/legal/service-level-agreement) apply to all Customers. For a summary and notice of changes, see our [Update Notices](/legal/archives/terms-update-notices).</Warning>
+
+This Service Level Agreement (“**SLA**”) governs your use of SLA Eligible Services (as defined in the table below) and accompanies the Flatpeak [Terms of Service](/legal/terms) (the "Agreement") entered into between you, the Customer and Flatpeak. Capitalized terms used in this SLA that are not defined herein have the meanings given to them in the Agreement.
+
+No service level agreement applies to Services that are not qualified as an SLA Eligible Service in this SLA.
+
+### Definition of Uptime
+
+We will use commercially reasonable efforts to make each SLA Eligible Service you purchase available with an Uptime Percentage of at least the Uptime Percentage Threshold for the applicable SLA Eligible Service listed in the table below.
+
+### SLA Eligible Services
+
+|Service |Uptime Percentage  |Uptime Percentage Threshold  |
+|:--------------------|:------------------|:----------------------------|
+|Connect              |Uptime Percentage is calculated by us by subtracting from 100% the percentage of continuous five (5) minute periods during a given calendar month in which the applicable service was Unavailable excluding any Uptime Exclusions.|Monthly 99.97%|
+|API |Uptime Percentage is calculated by us by subtracting from 100% the percentage of seconds during a given calendar month in which the applicable service was Unavailable excluding any Uptime Exclusions.|Monthly 99.99%|
+|Provider integration |The Uptime Percentage is the time in which each individual Provider Integration was available during the measurement period excluding any Uptime Exclusions. ‍ We will use reasonable commercial endeavors to solve any case of Unavailability within eight (8) hours of notification (“Time to Repair” also known as “TTR”). In the event of an Off-net issue, the eight (8) hours commitment does not apply. “Off-net issues” means any issue or problem that requires action in systems or networks operated or owned by third parties. In these cases, we will use reasonable commercial endeavors to seek to achieve a TTR of eight (8) hours but no Service Credit applies in that respect.|Monthly 99.90% TTR 8 hours|
+
+### Definition of Unavailability
+
+**“Unavailable”** or **“Unavailability”** means the following based on the specific SLA Eligible Service:
+
+| SLA Eligible Service | Definition of Unavailable or Unavailability                                                                                                                                                                                                                                                                                          |
+| :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connect         | When, in a given 60-second period, you attempt to make: (a) API calls to the service and all such API calls fail due to either a server-side timeout or internal service error.                                                                                                                                                      |
+| API            | When, in any given 15-second period, you attempt to make: (a) API calls the service and all such API calls fail due to either a server-side timeout or internal service error.                                                                                                                                                       |
+| Provider integration  | Each Provider Integration is considered to be unavailable when you receive an error or request timeout error response over a continuous period of over 300 seconds. Unavailability for each Provider integration is measured individually, not combined as a total, averaged, or aggregated across Provider Integrations. |
+
+For purposes of calculating whether we have met the applicable Uptime Percentage Threshold and notwithstanding anything to the contrary, an SLA Eligible Service will not be considered to be Unavailable if such Unavailability is caused by or arises out of one of the following (“**Uptime Exclusions**”):
+
+- Factors outside of our reasonable control, including, without limitation, any force majeure event, weather event, influences of buildings and structures (where applicable to the relevant SLA Eligible Services), telecommunications provider-related problems or issues, internet access or related problems occurring beyond the demarcation point of our service (or of our direct hosting subcontractors (i.e beyond the point in the network where we maintain access and control over the relevant Services), compliance with a regulatory requirement, direction or like obligation under or under applicable law;
+- Any action or inaction by you, your users, or any third party (other than our agents and subcontractors) including, where applicable to the SLA Eligible Services, your failure to comply with our instructions and your failure to provide reasonable access to relevant equipment;
+- Issues resulting from or arising out of your applications (including Customer Applications), equipment, software or other technology and/or third-party equipment, software or other technology not provided by Flatpeak;
+- Our ability to suspend or terminate your access to the applicable Service by the Agreement;
+- Any scheduled maintenance;
+- Unscheduled maintenance on the Platform Services Service that is performed outside of 08:00 to 18:00 UTC, provided that we have used reasonable endeavors to give you at least four (4) hours advanced notice;
+- Emergency maintenance on the Services, including maintenance on critical systems, changes that cannot wait for scheduled maintenance; and
+- Use of the applicable SLA Eligible Service in breach of the Agreement;
+- Beta (Early Access) Products;
+
+In the event we do not meet the applicable Uptime Percentage Threshold for the SLA Eligible Service you purchased, you will be entitled to request the applicable Service Credit listed in the table below. In each case you believe you are entitled to a Service Credit, you must notify us of such entitlement based on the applicable Credit Request Procedure below.
+
+### Service credits
+
+The Service Credits are granted at our sole discretion and only after our confirmation of the nature and accuracy of any alleged Unavailability. Service Credits will not entitle you to any refund or other payment from us. Service Credits may not be transferred or applied to any other Flatpeak account.
+
+### Sole Remedy
+
+Unless otherwise expressly provided in the Agreement, your sole and exclusive remedy for any unavailability, non-performance, or other failures by us to provide each SLA Eligible Service is the receipt of a Service Credit (if eligible) in accordance with the terms of the Agreement.
+
+### Who cannot claim
+
+You will not be eligible for any Service Credits if (i) you breached the Agreement, or (ii) your claim relates to an aspect of our Services for which Service Credits do not apply (including where Service Credits are not specified as applicable in the Agreement).
+
+| SLA Eligible Service | Service Credit                                                                                                                                                        | Credit Request Procedure                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connect              | A credit of three percent (3%) of the pro-rata fee paid by you during the calendar month in which the Uptime Percentage falls below the Uptime Percentage Threshold. | You must notify us if you believe you are entitled to a Service Credit within thirty (30) days of the event giving rise to the Service Credit request by email to [support@flatpeak.com.](https://flatpeak.com/support.) We will promptly reply indicating the acceptance or rejection of your request. If the request is rejected, we will provide an explanation of the rejection. If the request is accepted we will apply any approved Service Credits only against future payments otherwise due from you. |
+| API                  | A credit of three percent (3%) of the pro-rata fee paid by you during the calendar month in which the Uptime Percentage falls below the Uptime Percentage Threshold. | You must notify us if you believe you are entitled to a Service Credit within thirty (30) days of the event giving rise to the Service Credit request by email to [support@flatpeak.com.](https://flatpeak.com/support.) We will promptly reply indicating the acceptance or rejection of your request. If the request is rejected, we will provide an explanation of the rejection. If the request is accepted we will apply any approved Service Credits only against future payments otherwise due from you. |
+| Provider integration | A credit of one percent (1%) of the pro-rata fee paid by you during the calendar month in which the Uptime Percentage falls below the Uptime Percentage Threshold.   | You must notify us if you believe you are entitled to a Service Credit within thirty (30) days of the event giving rise to the Service Credit request by email to [support@flatpeak.com.](https://flatpeak.com/support.) We will promptly reply indicating the acceptance or rejection of your request. If the request is rejected, we will provide an explanation of the rejection. If the request is accepted we will apply any approved Service Credits only against future payments otherwise due from you. |

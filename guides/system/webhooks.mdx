@@ -1,0 +1,77 @@
+---
+title: Webhooks
+sidebarTitle: "Webhooks"
+---
+
+When building Flatpeak integrations, you might want your applications to receive events as they occur in your Flatpeak account.
+
+When an event occurs (for example, when a Customer object is created), Flatpeak generates a new Event object. By registering webhook endpoints in your Flatpeak account, you enable Flatpeak to automatically send Event objects as part of POST requests to the registered webhook endpoint hosted by your application. After your webhook endpoint receives the Event, your app can run backend actions.
+
+<Note>Receiving webhook events is particularly useful for listening to asynchronous events, such as when a customer’s contract with their energy provider expires.</Note>
+
+## Event object
+
+The Event object we send to your webhook endpoint provides a snapshot of the object that changed or has been created:
+
+```json
+{
+  "id": "evt_65e42b7827c0526548432b9f",
+  "object": "event",
+  "time_created": "2022-01-24T14:15:22Z",
+  "type": "device.create",
+  "data": {
+    "id": "dev_63a6087272941ef077a8fd3e",
+    "object": "device",
+    "account_id": "acc_661677911f2197045e6cf1b1",
+    "live_mode": true,
+    "reference_id": "DEV1234567890",
+    "last_seen": "2022-01-24T14:15:22Z",
+    "time_created": "2022-01-24T14:15:22Z"
+  }
+}
+```
+The [events guide](/guides/system/events) contains a full list of Flatpeak event types.
+
+## Pending deliveries
+
+Use [webhook logs](https://dashboard.flatpeak.com/webhooks) in the Dashboard to determine how many endpoints haven’t responded successfully to delivery. You can expedite resending or force failed deliveries to try again from there. Flatpeak will automatically retry deliveries on the following schedule:
+
+| Time        | Description                                                  |
+| :---------- | :----------------------------------------------------------- |
+| Immediately | As soon as an event has occurred                              |
+| 30 seconds  | In 30 seconds if the first delivery attempt is unsuccessful. |
+| 1 hour      | In 30 seconds if the first delivery attempt is unsuccessful. |
+| 6 hours     | In 30 seconds if the first delivery attempt is unsuccessful. |
+| 12 hours    | In 30 seconds if the first delivery attempt is unsuccessful. |
+| 24 hours    | In 24 hours. If this delivery attempt is unsuccessful, there will be no more automatic retries. Go to the [Webhooks](https://dashboard.flatpeak.com/webhooks) in the Dashboard to initiate the redelivery of failed webhooks. |
+
+### Delivery timeouts
+
+Flatpeak will wait up to 10 seconds for your server to respond to the delivery attempt, after which the attempt will be deemed failed if no response from your server has been received.
+
+## Delivery queue
+
+- View delivery queue to a [specific endpoint](https://dashboard.flatpeak.com/webhooks).
+- View all [events in your account](https://dashboard.flatpeak.com/events).
+
+## Debugging webhook integrations
+
+Multiple types of issues can occur when delivering events to your webhook endpoint:
+
+- Flatpeak might not be able to deliver an event to your webhook endpoint.
+- Your webhook endpoint might have an SSL issue.
+- Your network connectivity is intermittent.
+- Your webhook endpoint isn’t receiving events that you expect to receive.
+
+## HTTP status codes
+
+When an event displays a status code of 200, it indicates successful delivery to the webhook endpoint. You might also receive a status code other than 200. View the table below for a list of common HTTP status codes and recommended solutions.
+
+| Webhook status                | Description                                                            | Fix.                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| (Unable to connect) ERR	  | We’re unable to establish a connection to the destination server.	     | Make sure that your host domain is publicly accessible to the internet. |
+| (302) ERR (or another 3xx status)	| The destination server attempted to redirect the request to another location. We consider redirect responses to webhook requests as failures. | Set the webhook endpoint destination to the URL resolved by the redirect. |
+| (400) ERR (or other 4xx status) | The destination server can’t or won’t process the request. This might occur when the server detects an error (400) when the destination URL has access restrictions (401, 403), or when the destination URL doesn’t exist (404). | Make sure that your endpoint is publicly accessible to the internet and make sure that your endpoint accepts a POST HTTP method. |
+| (500) ERR (or other 5xx status) | The destination server encountered an error while processing the request. | Review your application’s logs to understand why it’s returning a 500 error. |
+| (TLS error) ERR | We couldn’t establish a secure connection to the destination server. These errors are usually caused by an issue with the SSL/TLS certificate or an intermediate certificate in the destination server’s certificate chain. | Perform an [SSL server test](https://www.ssllabs.com/ssltest/) to find issues that might cause this error. |
+| (Timed out) ERR | The destination server took too long to respond to the webhook request. | Make sure you defer complex logic and return a successful response immediately in your webhook handling code. |

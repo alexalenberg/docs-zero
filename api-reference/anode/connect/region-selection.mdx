@@ -1,0 +1,75 @@
+---
+title: 'Region Selection'
+icon: 'location-check'
+sidebarTitle: "9. Region selection"
+description: Customer picks their geo region.
+tag: "New"
+---
+
+The Region Selection page is returned in rare cases when a customer is on a geo-fenced tariff and Flatpeak is unable to map their address to the correct tariff region.
+
+This can happen if you did not provide a complete `postal_address`, or if the customer’s property is very close to the region border.
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/08a-geo-region-select.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "region_select",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "actions": [
+    "BACK"
+  ],
+  "data": {
+    "provider": {
+      "id": "prv_65de3024be51ded101a3a555",
+      "display_name": "EDF",
+      "logo_url": "https://s.flatpeak.com/1ded101a3a555.png"
+    },
+    "regions": [
+      "CORS",
+      "FR"
+    ]
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "region_select",
+  "data": {
+    "region": "FR"
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "region_select",
+  "action": "BACK"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                     | Error Description                                                   |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `data_json_invalid`            | Data does not conform to the JSON schema.                               |
+
+</Tab>
+</Tabs>

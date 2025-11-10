@@ -1,0 +1,273 @@
+---
+title: Frequently Asked Questions
+sidebarTitle: Frequently Asked Questions
+---
+Flatpeak is the only global platform for real-time end-user energy tariffs. We connect directly to energy providers to deliver live cost of energy (i.e. tariff) data to your device or system. This FAQ explains how Flatpeak simplifies energy cost-based device optimisation.
+
+<AccordionGroup>
+
+<Accordion title="How does Flatpeak work?" icon="info">
+**Flatpeak integrates with thousands of energy providers, dynamic wholesale markets and regional electricity networks globally.** By integrating directly to your customer’s electricity account in real time, Flatpeak’s APIs deliver accurate tariff data. This enables automated control logic—such as shifting device usage to times of lower cost or lower carbon intensity—without requiring manual configuration by the user.
+</Accordion>
+
+<Accordion title="Why should I use Flatpeak?" icon="user">
+**With Flatpeak, device and app makers can easily optimise their products to use cheaper and cleaner energy, anywhere in the world.**
+Without it, you’d need to build and maintain connections to thousands of energy providers across every market you operate in—an expensive and complex task. Flatpeak simplifies this with a single, consistent API for accessing real-time tariffs globally.
+</Accordion>
+
+</AccordionGroup>
+
+## Tariffs
+Electricity is priced per **unit** (kWh) and, occasionally, the kW. However, actual costs vary depending on time, usage, and provider. Flatpeak simplifies this by providing standardised, time-based pricing—so you can build energy-aware features without decoding complex tariff models.
+
+<AccordionGroup>
+
+<Accordion title="What are tariff types?" icon="shapes">
+Tariff type refers to the pricing structure used to determine the rate at which electricity is charged. It defines how the cost per unit (typically per kWh) changes based on factors such as time, usage, or customer category.
+
+Here are some common tariff types you might encounter:
+
+🔹 **Flat Tariff**
+- **Same price** per kWh at all times.
+- Simple, but doesn’t reflect real-time cost or carbon intensity.
+
+🔹 **Time-of-Use (ToU) Tariff**
+- Prices vary based on **time of day, day of week**, or **season**.
+- Common examples: cheaper at night, more expensive during peak hours.
+
+🔹 **Dynamic/Real-Time Tariff**
+- Prices change **hourly or sub-hourly**, based on **market conditions** or **grid demand**.
+- Examples include wholesale-linked tariffs or real-time carbon pricing.
+
+🔹 **Tiered or Block Tariff**
+- Cost increases or decreases depending on **how much electricity** you’ve used.
+- Often used for residential customers to encourage energy efficiency.
+
+🔹 **Demand-Based Tariff**
+- Charges include a component based on **peak power demand**, not just energy used.
+- Common in commercial/industrial settings and some residential markets.
+</Accordion>
+
+<Accordion title="What are the tariff components?" icon="layer-group">
+The electricity price that a customer pays typically consists of several components, which vary by country, provider, and customer type. Understanding these components is key to accurate energy optimisation and billing.
+
+Here’s a breakdown of the main components:
+
+🔹 **Energy (or Supply) Cost**
+- The actual cost of generating the electricity.
+- Can be fixed, time-based (e.g. Time-of-Use), or dynamic (e.g. wholesale market-linked).
+- This is often the **most variable** part of the price.
+- Flatpeak labels this tariff component as `COMMODITY`.
+
+🔹 **Network or Distribution Charges**
+- Covers the cost of delivering electricity from generators to homes/businesses.
+- Usually set by the local grid operator or DSO (Distribution System Operator).
+- May vary by region, usage level, or time.
+- Flatpeak labels this tariff component as `NON_COMMODITY`.
+
+🔹 **Taxes and Levies**
+- Includes government taxes, carbon levies, green energy fees, etc.
+- Often flat-rate or percentage-based.
+- Can include VAT, renewable energy surcharges, or national capacity charges.
+- Flatpeak labels this tariff component as `NON_COMMODITY`.
+
+🔹 **Environmental or Capacity Charges (optional)**
+- Some tariffs include charges to support grid stability, green energy schemes, or capacity reserve.
+- May appear as line items or be built into unit rates.
+
+🔹 **Standing Charge (or Fixed Daily Charge)**
+- A daily or monthly fee just to be connected to the grid, regardless of usage.
+- Covers admin, metering, and maintenance costs.
+
+<Note>Flatpeak does not provide pricing information that cannot be used to optimise energy costs. e.g fixed daily or monthly fees are not available</Note>
+</Accordion>
+
+<Accordion title="What is tariff direction?" icon="elevator">
+
+- **IMPORT**: What customer pays to the electricity provider for energy use.
+- **EXPORT**: What the provider pays to the customer when electricity is sent back to the grid.
+</Accordion>
+
+<Accordion title="Can customers choose their tariff?" icon='list-ol'>
+In most markets, customers can choose both their energy provider and their tariff. The available options depend on where they live, so there may be thousands of tariffs to choose from.
+
+Customers typically select a tariff based on factors such as their lifestyle, risk tolerance, and the level of intelligence and automation in their home or devices.
+
+<Note>Flatpeak does not assist customers in switching to a different tariff. Instead, it enables smart devices to make the most of the tariff the customer already has—especially if it’s a dynamic tariff, where real-time optimisation delivers the most significant benefits.</Note>
+</Accordion>
+
+<Accordion title="How frequently are tariffs updated?" icon="rotate">
+The frequency of tariff updates depends on the type of tariff:
+
+- **Wholesale market tariffs** (e.g., Australia’s NEM, Europe’s EpexSpot) — updated every few minutes or hours.
+- **Next-day market tariffs** (e.g., NordPool, GME, Omie) — updated daily or more frequently.
+- **Other tariffs** — may update daily, quarterly, yearly, or even less often, which can result in an individual customer contract, a specific region or an entire country being impacted.
+
+<Info>
+Flatpeak aligns its background tariff update process with the tariff type.
+
+Flatpeak automatically recognises and categorises every tariff it processes, applying the correct update strategy. When using the [Scheduling](/api-reference/zero/slots/) and [Reporting](/api-reference/zero/costs) API endpoints, tariff changes are handled automatically. If you’re using [Raw Tariff Rates](/api-reference/zero/tariffs), you will need to manage updates yourself using the [next_update](/api-reference/zero/tariffs/get-tariff-rates#response-next-update) parameter that we pass in every API response.
+</Info>
+</Accordion>
+
+<Accordion title="Why not just use NordPool data?" icon="chart-area">
+Data feeds from power exchanges like **NordPool**, **GME**, **EPEX**, **OMIE**, and others show the wholesale price of electricity traded between power plants, network operators and retailers. These prices rarely match what end customers see in their provider’s online portal or on their bill.
+
+This is because they typically pay **additional charges**, such as:
+- Taxes, which vary by country and customer type
+- Transmission (grid) fees, which depend on the region, provider, and time of use
+
+In addition, even when a tariff is marketed as “market-based,” some retailers will smooth the price curve to shield customers from extreme volatility—usually by capping price spikes and adding markup when prices go negative.
+
+<Info>
+Flatpeak provides much more accurate data by connecting directly to the customer’s energy provider account and retrieving prices that reflect the full cost they pay. Where needed, Flatpeak also adds taxes and grid fees to ensure the final price closely matches the customer’s actual bill.
+
+This allows you to:
+- Optimise device operation based on true energy cost, in real-time
+- Report actual monetary savings and/or export earnings
+
+In short, Flatpeak provides the true energy price your customer sees on their bill.
+</Info>
+</Accordion>
+
+</AccordionGroup>
+
+## VPP & Flexibility
+
+<AccordionGroup>
+
+<Accordion title="What is VPP?" icon="industry">
+Virtual Power Plants (VPPs) let devices trade energy based on real-time supply and demand. Flatpeak makes this possible by providing you with live import and export prices for energy at the asset’s location, allowing your devices to buy or sell energy at the most optimal times.
+</Accordion>
+
+<Accordion title="What is flexibility trading?" icon="traffic-light">
+**Flexibility trading** typically refers to energy networks, providers or third-party energy traders taking over control of devices, turning them on or off to help balance the grid.
+
+Flatpeak does not facilitate direct grid control of this kind. Instead, it supports smart devices in participating in energy flexibility by providing the data and tools that enable optimisation of energy use based on price, in real-time or near real-time. Allowing networks and providers to influence the device without having to take full control over its operation and end-user experience.
+</Accordion>
+
+</AccordionGroup>
+
+## Flatpeak service
+
+<AccordionGroup>
+
+<Accordion title="How long does it take to integrate?" icon='clock'>
+Customers are typically up and running within a month (although this can be dependent on your cloud service and approach taken). For the fastest results, we recommend customers work with our customer success teams to accelerate their experience and minimise time delays.
+</Accordion>
+
+<Accordion title="How many locations can Flatpeak support?" icon='house-turret'>
+Flatpeak already serves customers with hundreds of thousands to millions of locations and is capable of handling tens of thousands of signups per hour.
+</Accordion>
+
+<Accordion title="What tariff components are included in Flatpeak data?" icon="layer-group">
+Flatpeak data includes commodity and grid fees that are linked to the amount or timing of energy use. It also includes relevant taxes.
+
+Fixed charges, such as monthly connection fees or other costs that do not depend on energy consumption, are not included.
+</Accordion>
+
+<Accordion title="How accurate is Flatpeak data?" icon="badge-check">
+Flatpeak obtains tariff data directly from individual customer accounts, regional markets, electricity networks, and regulatory documents that specify regional taxes and fees. This is the same information energy providers use to generate customer bills. Flatpeak maintains the most comprehensive database of energy tariffs worldwide.
+</Accordion>
+
+<Accordion title="How Connect selects the best tariff link method?" icon="link">
+
+When a customer uses Connect, we start with the fastest, most accurate method. If it fails—say they skip login—we instantly fall back to the next best option. No dead ends. No manual steps unless absolutely necessary.
+
+Connect prioritises tariff connection methods in this order:
+	1.	`DIRECT` – Instant, authenticated connection
+	2.	`LIBRARY` – Selection for Flatpeak-maintained library
+	3.	`MARKET` – Automatically links market-based tariff by geo-location
+	4.	`MANUAL` – Customer input as a last resort
+
+<Info>Review [Connect flow architecture](/guides/connect/flow-architecture) guide for further details.</Info>
+
+</Accordion>
+
+<Accordion title="Which energy providers are supported?" icon="wind-turbine">
+**Flatpeak supports all energy providers across global markets.**
+We maintain an up-to-date directory of thousands of providers, comprising approximately 2,500 in Europe, 2,000 in North America, and over 7,500 worldwide.
+
+If a provider is missing, you can report it during onboarding without delaying your setup. We prioritise new integrations based on:
+- Actual user demand
+- Customer feedback and requested priorities
+- Market changes, including new or retiring providers
+</Accordion>
+
+<Accordion title="Can Flatpeak detect tariff changes?" icon="user-secret">
+**Yes—Flatpeak detects tariff changes in three main ways:**
+
+1. **Provider Change**:
+When a customer switches energy providers, Flatpeak detects the change and sends a webhook notification. You can use this to prompt the customer to connect their new provider. The same applies when a tariff expires.
+
+2. **Tariff Change (Same Provider)**:
+If the customer stays with the same provider but changes tariffs, Flatpeak automatically updates the tariff information via the API—no action needed from your side.
+
+3. **Price Change (Within Tariff)**:
+If prices change within the same tariff—whether it’s fixed, time-of-use, or fully dynamic—Flatpeak detects and updates this in real time.
+
+<Note>Flatpeak’s system keeps you informed in real-time, so you can notify customers and keep their tariff data current without manual work. Webhooks help you trigger customer communications when changes happen.</Note>
+</Accordion>
+
+<Accordion title="Can Energy Providers join?" icon='bolt'>
+**Yes—Flatpeak can quickly integrate with any energy provider.**
+This saves providers and device manufacturers from having to build individual integrations.
+
+Most integrations take **3–4 weeks**, with Flatpeak handling the majority of the work, including testing and implementation. Once connected, providers can deliver real-time tariff data to all connected devices, regardless of how complex or dynamic the tariff is.
+
+<Info>See [Provider Integration](/guides/providers) for full details.</Info>
+</Accordion>
+
+</AccordionGroup>
+
+## Branding
+
+<AccordionGroup>
+<Accordion title="Can I use the energy provider logos in my ads?" icon="font-awesome">
+Yes, you can use energy provider logos and names for **comparative purposes**, which is generally allowed under fair use.
+
+However, you **should not highlight or promote a specific provider** as a partner or exclusive option unless you have their explicit permission.
+</Accordion>
+
+<Accordion title="Can I brand and customise the service?" icon='image'>
+Yes—Flatpeak service is an API and is completely invisible to your end users.
+You have full control over how Flatpeak-powered features are presented, so you can tailor the experience to fit your brand and design seamlessly.
+
+<Note>**Provider login and consent pages can not be customised**, as they are controlled by the energy provider.</Note>
+</Accordion>
+
+</AccordionGroup>
+
+## Commercial & Legal
+
+<AccordionGroup>
+
+<Accordion title="How is Flatpeak service charged?" icon='coins'>
+Flatpeak charges based on the number of **unique locations** you connect.
+We offer **volume discounts**—the more locations you onboard, the lower the cost per location.
+
+We also support migrating your existing tariff data into Flatpeak, which simplifies operations and reduces maintenance. **Migrated locations may qualify for additional discounts**.
+</Accordion>
+
+<Accordion title="What are the payment options?" icon='cash-register'>
+Flatpeak supports both **invoice-based** and **automated card payments**.
+Billing is monthly and based on the number of **active locations**.
+
+To update your payment method, visit the [Billing](https://dashboard.flatpeak.com/settings/billing) section of your Flatpeak dashboard.
+</Accordion>
+
+<Accordion title="Is Flatpeak compliant with privacy laws & regulations?" icon='scale-balanced'>
+Yes—Flatpeak is fully compliant with global privacy laws, including **GDPR, CCPA, CPPA, LGPD, PDPA,** and similar regulations.
+
+By default, Flatpeak acts as a **Data Processor**, handling customer data only under your instruction. We support you in obtaining the necessary end-customer consent to access and use their tariff data.
+
+All customer-facing interactions are **branded as your own**, so users see the service as coming from your company, not Flatpeak.
+
+<Info>For more details, see our [Legal](/legal) documentation.</Info>
+</Accordion>
+
+<Accordion title="How long does tariff access last?" icon='timer'>
+Tariff access (or customer consent) duration varies depending on the energy provider’s policies. Typically, consent lasts 1 to 3 years but must be renewed sooner if the customer switches energy suppliers or moves to a new address. Flatpeak automatically detects these changes and notifies you, enabling you to alert the customer in a timely manner.
+</Accordion>
+
+</AccordionGroup>

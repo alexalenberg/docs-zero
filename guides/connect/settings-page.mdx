@@ -1,0 +1,191 @@
+---
+title: Building a tariff settings page in your app
+sidebarTitle: "2. Tariff settings page"
+---
+
+When integrating Flatpeak, add a page in your app where customers can connect, view, and manage their tariffs. This guide shows the tools Flatpeak gives you to build it, plus optional features you may want to include.
+
+<Tabs>
+
+<Tab title="No Connection - Basic">
+<Frame>
+<img
+  src="/images/tariff-settings-page--blank-basic.png" style={{ width: "200px" }}
+/>
+</Frame>
+</Tab>
+
+<Tab title="Connected - Basic">
+<Frame>
+<img
+  src="/images/tariff-settings-page--connected-basic.png" style={{ width: "200px" }}
+/>
+</Frame>
+</Tab>
+
+<Tab title="No Connection - Advanced">
+<Frame>
+<img
+  src="/images/tariff-settings-page--blank-advanced.png" style={{ width: "200px" }}
+/>
+</Frame>
+</Tab>
+
+<Tab title="Connected - Advanced">
+<Frame>
+<img
+  src="/images/tariff-settings-page--connected-advanced.png" style={{ width: "200px" }}
+/>
+</Frame>
+</Tab>
+
+</Tabs>
+
+## Basic vs. Advanced
+
+Customers may hold contracts with more than one energy provider at the same time. For example: buy electricity from Company A, pay Company B for delivery.  
+
+- Need only the **import** price? Use **Basic**.  
+- Need **export** prices too, or customer-defined [grid fees](/guides/grid-fees)? Use **Advanced**.  
+
+Details for both are below.
+
+## Tariff connection types
+
+| Type/Direction               | Description                                                             |
+| :----------------- | :---------------------------------------------------------------------- |
+| `COMMODITY`-`IMPORT`        | Cost of the electricity consumed. Essential to enable this—it’s foundational across all markets. |
+| `COMMODITY`-`EXPORT`        | Price for exported electricity. Use this if your users have solar panels or energy storage.  |
+| `NON_COMMODITY`-`IMPORT`    | Delivery costs (e.g., **grid fees**). Recommended if your customer pays delivery charges separately. |
+
+- **Basic** = `COMMODITY`-`IMPORT` only  
+- **Advanced** = adds `COMMODITY`-`EXPORT` + `NON_COMMODITY`-`IMPORT`  
+
+## Implementing page actions
+
+1. ### First connection
+
+To connect a tariff (e.g. `COMMODITY`-`IMPORT`), pass the `type` and `direction` when creating a [Connect token](/api-reference/zero/connect/create-a-connect-token):
+
+```json Example request highlight={6,7}
+curl --request POST \
+  --url https://api.flatpeak.com/connect/tariff/token \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "type": "COMMODITY",
+  "direction": "IMPORT"
+}'
+```
+
+2. ### View or update
+
+Before you can let your customers to View or Edit their tariff, you need to display their current tariff connections. For this call [Retrieve a location status](/api-reference/zero/locations/retrieve-a-location-status) endpoint:
+
+To show or edit tariffs, first fetch existing connections with [Retrieve location status](/api-reference/zero/locations/retrieve-a-location-status) endpoint:
+
+<CodeGroup>
+```json Example request
+curl --request GET \
+  --url https://api.flatpeak.com/locations/loc_641b90b758fb8e6293716e40/status \
+  --header 'Authorization: Bearer <token>'
+```
+```json Example response
+{
+  "id": "loc_641b90b758fb8e6293716e40",
+  "object": "location_status",
+  "tariff_status": {
+    "commodity_import": {
+      "status": "CONNECTED",
+      "connection_type": "DIRECT",
+      "provider": {
+        "id": "prv_63a6087272921ef075a8fd3e",
+        "display_name": "Octopus Energy",
+        "logo_url": "https://s.flatpeak.com/83b06a60e38c2.png"
+      },
+      "tariff": {
+        "id": "trf_66ba584eb6923d7c3b942ef6",
+        "display_name": "Flexible Go 2023",
+        "structure_type": "FIXED",
+        "contract_end_date": "2024-01-01T00:00:00Z"
+      }
+    },
+    "commodity_export": {
+      "status": "NOT_CONNECTED "
+    }
+  }
+}
+```
+</CodeGroup>
+
+When the customer picks a tariff to update, create a new [Connect token](/api-reference/zero/connect/create-a-connect-token) with their location_id and tariff type/direction. This launches Connect with the [Tariff Summary](/api-reference/zero/connect/tariff-summary) page.
+
+```json Example request highlight={6,7}
+curl --request POST \
+  --url https://api.flatpeak.com/connect/tariff/token \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "locaiton_id": "loc_641b90b758fb8e6293716e40",
+  "type": "COMMODITY",
+  "direction": "IMPORT"
+}'
+```
+
+3. ### Disconnect
+
+To disconnect, run this sequence:
+
+<Steps>
+
+  <Step title="Create a Connect token">
+    [Create a Connect token](/api-reference/zero/connect/create-a-connect-token) with the `location_id` where the tariff should be disconnected.
+    <CodeGroup>
+    ```json Example request highlight={8}
+    curl --request POST \
+      --url https://api.flatpeak.com/connect/tariff/token \
+      --header 'Authorization: Bearer <token>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "type": "COMMODITY",
+      "direction": "IMPORT",
+      "location_id": "loc_641b90b758fb8e6293716e40",
+      "callback_uri": "<any service that can receive webhooks>",
+    }'
+    ```
+    ```json Example response
+    {
+      "connect_token": "cot_65df3e949a785c52283026ec",
+      "expires_in": 86400,
+      "live_mode": true
+    }
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Send disconnect action">
+    Call Connect's [summary_fixed_confirm](/api-reference/zero/connect/tariff-summary#code) route and send `DISCONNECT` action:
+    <CodeGroup>
+    ```json Example request
+    curl --request POST \
+      --url https://connect.flatpeak.com \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "connect_token": "cot_6587fa4362341be5b524de3b",
+      "route": "summary_fixed_confirm",
+      "action": "DISCONNECT"
+    }'
+    ```
+    ```json Example response
+    {
+      "connect_token": "cot_6587fa4362341be5b524de3b",
+      "route": "session_complete",
+      "direction": "IMPORT",
+      "data": {
+          "callback_uri": "<any service that can receive webhooks>?fp_cot=cot_6587fa4362341be5b524de3b"
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>

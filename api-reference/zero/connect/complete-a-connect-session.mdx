@@ -1,0 +1,24 @@
+---
+title: 'Complete a connect session'
+icon: 'flag-checkered'
+sidebarTitle: "Complete a session"
+description: Handle completion of a Connect session.
+---
+
+Once the Connect flow has been completed, Connect will respond with the `session_complete` object. The data payload will include your original `callback_uri` with the fp_cot query parameter carrying the original `connect_token`.
+
+<CodeGroup>
+```json Example Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "session_complete",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+      "callback_uri": "https://webhook.site/4623e56fc5c1?fp_cot=cot_6587fa4362341be5b524de3b"
+  }
+}
+```
+</CodeGroup>
+
+Return your customer to other pages of your app and get your backend systems to go to [exchange-a-connect-token](/api-reference/zero/connect/exchange-a-connect-token) endpoint to obtain a permanent ID (`location_id`) that you will use to interact with Flatpeak API. Save `location_id` permanently in your system in reference to your internal customer address object

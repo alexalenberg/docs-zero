@@ -1,0 +1,153 @@
+---
+title: Carbon intensity reporting with Flatpeak
+sidebarTitle: "Carbon intensity"
+---
+
+Flatpeak enables access to carbon intensity rates for any location in the world, and access to historic carbon data is available up to 72 hours into the future. You can use this service to report historic carbon consumption costs and to schedule your products and services to use low-carbon energy.
+
+## Combining monetary and carbon cost
+
+With Flatpeak, you can access both tariff and carbon datasets pre-normalised for the requested time interval:
+
+```json Example ElectricityMaps dataset
+{
+  "zone": "US-CAL-CISO",
+  "forecast": [
+    {
+      "carbonIntensity": 210,
+      "datetime": "2023-06-08T13:00:00.000Z"
+    },
+    {
+      "carbonIntensity": 153,
+      "datetime": "2023-06-08T14:00:00.000Z"
+    },
+    {
+      "carbonIntensity": 139,
+      "datetime": "2023-06-08T15:00:00.000Z"
+    }
+  ]
+}
+```
+
+```json Example Flatpeak dataset
+{
+  "location_id": "loc_64a9663b6d0efda87d3b9cf8",
+  "data": [
+    {
+      "valid_from": "2023-07-08T13:36:08Z",
+      "valid_to": "2023-07-08T14:00:00Z",
+      "tariff": {
+        "cost": 18,
+        "confidence": 1
+      },
+      "carbon": {
+        "confidence": 1,
+        "intensity": 210,
+        "relative": 0.91
+      }
+    },
+    {
+      "valid_from": "2023-07-08T14:00:00Z",
+      "valid_to": "2023-07-08T15:00:00Z",
+      "tariff": {
+        "cost": 5,
+        "confidence": 1
+      },
+      "carbon": {
+        "confidence": 1,
+        "intensity": 153,
+        "relative": 0.73
+      }
+    }
+  ]
+}
+```
+
+## How Flatpeak obtains carbon data
+
+Flatpeak is not a carbon data supplier. We source carbon data from ElectricityMaps (paid) and CarbonIntensityUK (free). You will need to provide API keys from your account with ElectricityMaps to use this service anywhere outside of the United Kingdom, where we use CarbonIntensityUK, which is free and does not require you to enter an API key.
+
+| Supplier                                            | Description                                                                                                                                                                                                                                                                                                                               |
+| :-------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ElectricityMaps](https://www.electricitymaps.com/) | provides global coverage using your own ElectricityMaps account details. You can [sign up for a free trial ](https://www.electricitymaps.com/) if you're not already a customer. Once you have their API key, enter it in the [Integrations](https://dashboard.flatpeak.com/integrations) sections in Flatpeak Dashboard. |
+| [CarbonIntensityUK](https://carbonintensity.org.uk/)  | is very granular, enabled by default, and free, but only provides data for the United Kingdom.                                                                                                                                         |
+
+
+## Troubleshooting carbon datasource integration
+
+If you are not getting carbon intensity data when making requests to [tariff-rates](/api-reference/zero/tariffs/get-tariff-rates) or [cost-calculations](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) API endpoints, follow these steps to troubleshoot:
+
+
+<Steps>
+<Step title="Check Location object">
+
+Make sure that the [Location](/api-reference/zero/locations/retrieve-a-location) object has a value in the `carbon` property:
+
+```json
+"carbon": [
+    "reg_64a94563544268484146f1f4"
+]
+```
+
+</Step>
+<Step title="Get carbon region record from Flatpeak Grid API">
+
+Query **/regions** endpoint of Flatpeak Grid API to get the description for the assigned region; make sure it is what you are expecting, i.e. if you supplied a postal address in the Republic of Ireland, `reference_id` shall be set to **IE**:
+<CodeGroup>
+```bash Request
+curl --request GET \
+  --url https://grid-api.flatpeak.com/regions/reg_64a94563544268484146f1f4
+```
+```json Response
+{
+  "id": "reg_64aa6db7e19e3b73e7586732",
+  "name": "Ireland",
+  "object": "region",
+  "reference_id": "IE",
+  "source_id": "src_6421ca2adb49cc22d81010db",
+  "type": "carbon",
+  "time_created": "2023-07-09T08:20:07Z"
+}
+```
+</CodeGroup>
+
+</Step>
+<Step title="Get carbon source record from Flatpeak Grid API">
+
+Note the`source_id` and query **/sources** endpoint of Flatpeak Grid API. The response will provide information about the carbon data supplier.
+
+<CodeGroup>
+```bash Request
+curl --request GET \
+  --url https://grid-api.flatpeak.com/sources/src_6421ca2adb49cc22d81010db
+```
+```json Response
+{
+  "id": "src_6421ca2adb49cc22d81010db",
+  "name": "ElectricityMaps",
+  "object": "source",
+  "is_enabled": true,
+  "type": "carbon",
+  "area_served": [
+    {
+      "country_code": "ES",
+      "states": null
+    }
+  ],
+  "time_created": "2023-03-27T16:54:32Z"
+}
+```
+</CodeGroup>
+
+</Step>
+<Step title="Understanding the error">
+
+| []()     | []()                                                                    |
+| ---------- | ------------------------------------------------------------------------------- |
+| If supplier `name` is **CarbonIntensityUK**   | Used for all UK addresses and geolocations. If you are querying for a UK location and not getting carbon data, contact [support](https://flatpeak.com/support) |
+| If supplier `name` is **ElectricityMaps**  |  Used for the rest of the world. If you are not getting data, you probably have not purchased access for that region from ElectricityMaps; contact them for support.                 |
+
+</Step>
+</Steps>
+
+<Tip>If you need additional help getting the carbon data to work, please contact [support](https://flatpeak.com/support).</Tip>

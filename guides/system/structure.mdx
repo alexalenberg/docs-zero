@@ -1,0 +1,69 @@
+---
+title: Core object relationships
+sidebarTitle: "Core objects"
+---
+
+The Flatpeak API is organised around a set of core objects. The diagram below illustrates the relationships between these objects, along with their key attributes and methods. Click any object to view its corresponding API reference.
+
+```mermaid
+classDiagram
+direction LR
+    class Customer {
+	    +your user reference
+    }
+
+    class Provider {
+	    +name
+	    +serving area
+	    +connection types
+    }
+
+    class Location {
+	    +your address reference
+	    +postal address
+	    +currency
+	    +time zone
+	    +have usage schedules created()
+	    +record usage meter reads()
+	    +have energy cost calculated()
+    }
+
+    class Device {
+	    +your device reference
+	    +have usage schedules created()
+	    +record usage meter reads()
+	    +have energy cost calculated()
+    }
+
+    class TariffElement {
+	    +direction
+	    +connection type
+	    +connection status
+	    +contract term
+	    +price schedule
+    }
+
+    Customer "1" --|> "n" Location : Linked
+    Provider "1" --|> "n" TariffElement : Linked
+    Location "n" .. "n" Device : All Device meter records have Location context
+    Location "1" --|> "n" TariffElement : Linked
+
+	click Customer href "https://docs.flatpeak.com/api-reference/zero/customers/"
+	click Provider href "https://docs.flatpeak.com/api-reference/zero/connect/provider-selection"
+	click Location href "https://docs.flatpeak.com/api-reference/zero/locations/"
+	click Device href "https://docs.flatpeak.com/api-reference/zero/devices/"
+	click TariffElement href "https://docs.flatpeak.com/api-reference/zero/tariffs/"
+
+```
+
+A summary of each object and its key properties is provided below:
+
+| Object           | Description                                                                                                                                             | Key properties                                |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------|
+| `Customer`        | A user in your system.                                                                                                                                   | *Your user reference*                          |
+| `Location`        | A physical address (supply address) where electricity is delivered under a contract with an energy provider — e.g. flat, house, office, or factory. | *Postal address, linked Tariff(s), energy consumption and/or export history* |
+| `Tariff(Element)` | A cost component of electricity supply at a Location, based on one or more contracts — e.g. energy usage rates or network charges. TariffElement objects are typically created automatically via the [Connect](/plan) flow and kept up to date by Flatpeak in the background, usually refreshed once per day.                 | *Price (e.g. energy cost) schedule*               |
+| `Device`          | A physical device (e.g. EV, charger, battery, HVAC). Devices are not directly linked to Locations, but an internal association is created when you submit meter readings, as these are always contextual to the device’s current location. | *Your device reference, energy consumption and/or export history* |
+| `Provider`        | Identifies the energy provider for a Tariff Element, allowing you to track which organisation supplies electricity to your users.                        | *Name, served area*                            |
+
+<Info>See the [FAQ](/faq) to learn more about energy markets and Flatpeak service concepts.</Info>

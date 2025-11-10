@@ -1,0 +1,30 @@
+---
+title: Managing device identifiers
+sidebarTitle: "Device identifiers"
+---
+
+Various Flatpeak API endpoints require you to use device identifiers. These represent a physical or virtual device in your systems.
+
+To create a device identifier, use the [create-device](/api-reference/zero/devices/create-a-device) endpoint. For cross-reference, we recommend that you populate the `reference_id` field with the unique ID of that device as used in your systems.
+
+<CodeGroup>
+```json Example request
+curl --request POST \
+  --url https://api.flatpeak.com/devices \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "reference_id": "DEV1234567890"
+}'
+```
+```json Example response
+{
+  "id": "dev_63a6087272941ef077a8fd3e",
+  "object": "device",
+  "live_mode": true,
+  "reference_id": "DEV1234567890"
+}
+```
+</CodeGroup>
+
+Store Flatpeak `device_id` from the response in your systems as a cross-reference to your internal device identifier, in this example, `DEV1234567890`.

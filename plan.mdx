@@ -1,0 +1,35 @@
+---
+title: Plan your integration
+---
+
+This guide will walk you through the process of planning your integration with Flatpeak.
+
+<Steps>
+<Step title="Enable customers to connect their energy tariff in your app.">
+  Flatpeak API includes a group of methods (collectively referred to as "**Connect**") for requesting your customer's consent to securely access their energy provider account to fetch the tariff -- or if Flatpeak has not yet integrated that provider, your customer will be able to enter their tariff manually.
+
+You can choose from two different integration paths:
+
+<Card title="WebView - Clone our reference implementation and embed it" icon="rocket" horizontal href="/guides/connect/webview">
+  Get up and running fast with our open-source reference implementation of Flatpeak API for you app. Clone and deploy in hours. Click to jump to the section.
+</Card>
+<Card title="Native - Build necessary pages in your app using Flatpeak API" icon="turtle" horizontal href="/guides/connect/api">
+  Prefer a native UX? Use the API directly—our most popular but more dev-intensive method. Typically takes two weeks to go live. Click to jump to the section.
+</Card>
+
+</Step>
+<Step title="Use Flatpeak API to get their energy price, schedule, and calculate costs.">
+  Once a customer completes the **Connect** flow, your backend can immediately query the Flatpeak API for their tariff data and access all other energy intelligence endpoints.
+
+You can choose from two different integration paths for this step too:
+
+<Card title="We handle scheduling and cost reporting for you" icon="stars" horizontal href="/guides/scheduling">
+Use our scheduling and cost reporting endpoints for rapid implementation.
+</Card>
+
+<Card title="You get raw tariffs and do all math" icon="rss" horizontal href="/guides/reporting/tariff-rates">
+Download raw tariffs and handle all planning, scheduling and cost reporting yourself.
+</Card>
+
+</Step>
+</Steps>

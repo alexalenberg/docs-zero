@@ -1,0 +1,280 @@
+---
+title: Flatpeak integration guide for energy providers
+sidebarTitle: "For providers"
+---
+
+This document outlines how an energy provider can integrate with Flatpeak, enabling a wide range of customer assets to automatically follow their contracted tariffs, no matter how complex or dynamic those tariffs are.
+
+If you represent an energy provider interested in integrating with Flatpeak, please email [integrations@flatpeak.com](mailto:integrations@flatpeak.com). We will be in touch to arrange a call to discuss next steps.
+
+## Time and scope
+
+The time and effort required to integrate with Flatpeak depends on the configuration of your systems. Typically, an integration can be completed in 2-4 weeks, with most or all work done by our dev team, followed by 2 weeks of testing.
+
+## Integration process
+
+Flatpeak would typically build a bespoke integration with your systems, enabling compatibility with any authentication method and data format. Ideally, authentication is handled via OAuth using long-lived tokens; the customer tariff is retrieved in whatever format your system provides.
+
+A standard integration involves two main parts:
+
+### 1. Tariff access authorisation
+
+<Steps>
+<Step title="Receive request">
+
+Your customers typically interact with Flatpeak via their manufacturer’s device companion app, which integrates our APIs. When they select you as their provider, we instruct the companion app to redirect the browser to your authentication URI:
+
+<CodeGroup>
+
+```http Your receive the redirect
+https://<your authentication URI>?connect_token=cot_68541c4c407600f62fd98a97
+```
+
+</CodeGroup>
+
+<Info>
+
+The `connect_token` is a unique, time-limited token used to authenticate the session.
+
+</Info>
+
+</Step>
+
+<Step title="Obtain session context">
+
+Call the Flatpeak API to retrieve the session context. The API authentication credentials required for this request will be provided by the Flatpeak team during onboarding.
+
+<CodeGroup>
+
+```json Your request
+curl --request GET \
+  --url https://api.flatpeak.com/connect/session/{connect_token} \
+  --header 'Authorization: Basic <encoded-value>'
+```
+
+```json Response
+{
+  "connect_token": "cot_68541c4c407600f62fd98a97",
+  "direction": "IMPORT",
+  "live_mode": true,
+  "data": {
+    "accepted_terms": false,
+    "account": {
+      "id": "acc_65e421bed29d88d9012e0662",
+      "display_name": "ACME",
+      "logo_url": "https://static.flatpeak.com/<...>/acme.png",
+      "privacy_url": "https://acme.com/privacy",
+      "support_url": "https://acme.com/support",
+      "terms_url": "https://acme.com/terms"
+    },
+    "urls": {
+      "redirect_uri": "<your authentication URI>",
+      "connect_web_uri": "https://auth.direct.flatpeak.com"
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+<Info>
+
+The `account` object contains Flatpeak customer details, including links to their logo, Terms of Service, Support and Privacy Policy. Use this information on your **Sharing Consent** screen, as described later in this article.
+
+The `redirect_uri` field contains your authentication URI to which the user was redirected. It is included for audit purposes.
+
+The `connect_web_uri` field conlains URI where you will redirect customer's session after they completed interaction with your service.
+
+</Info>
+
+</Step>
+
+<Step title="Identify your customer">
+
+Present a screen where customers authenticate using your system’s credentials:
+
+<Frame caption="Login screen">
+  <img src="/images/Direct Login.png" style={{ width: "200px" }} />
+</Frame>
+
+<Info>
+  If the customer declines or cannot log in, skip to the **Submit session
+  status** step below.
+</Info>
+
+</Step>
+
+<Step title="Obtain tariff sharing consent">
+
+Request your customer’s consent to allow a specific third party to access their tariff data. Use contents of the `account` object from the **Session Context** response to populate this consent screen.
+
+<Frame caption="Consent screen">
+  <img src="/images/Direct Consent.png" style={{ width: "200px" }} />
+</Frame>
+
+<Info>
+  If the customer declines to consent, skip to the **Submit session status**
+  step below.
+</Info>
+
+</Step>
+
+<Step title="Submit session status to Flatpeak API">
+
+<Tabs>
+
+  <Tab title="Login declined/failed">
+
+If the customer declines or cannot log in, notify the Flatpeak API:
+
+<CodeGroup>
+
+```json Request
+curl --request PUT \
+--url 'https://api.flatpeak.com/connect/consent_capture/{connect_token}' \
+  --header 'Authorization: Basic <encoded-value>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "action": "DISMISS_LOGIN"
+}'
+```
+
+```json Response
+{
+  "connect_token": "cot_68541c4c407600f62fd98a97",
+  "direction": "IMPORT",
+  "live_mode": true,
+  "status": "accepted"
+}
+```
+
+</CodeGroup>
+
+</Tab>
+
+<Tab title="Consent declined">
+
+If the customer declines to share their tariff data, notify the Flatpeak API:
+
+<Info>
+  The optional `terms_url` can include the URL to your terms and conditions page
+  shown (and accepted) by the customer during their session. Flatpeak will store
+  this URL along with the transaction timestamp for reference.
+</Info>
+
+<CodeGroup>
+
+```json Request
+curl --request PUT \
+--url 'https://api.flatpeak.com/connect/consent_capture/{connect_token} \
+  --header 'Authorization: Basic <encoded-value>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "action": "DISMISS_CONSENT"
+}'
+```
+
+```json Response
+{
+  "connect_token": "cot_68541c4c407600f62fd98a97",
+  "direction": "IMPORT",
+  "live_mode": true,
+  "status": "accepted"
+}
+```
+
+</CodeGroup>
+
+</Tab>
+<Tab title="Consent given">
+
+Submit the required account access credentials to the Flatpeak API. The data object must include everything needed for Flatpeak to access the customer’s account and retrieve their tariff in headless mode—such as an access token or authentication key(s).
+
+<Info>
+
+The `auth_data` object must include any number of key-value pairs required to access the customer’s account and retrieve their tariff. Flatpeak will implement custom logic to fetch this data based on your integration requirements.
+
+The optional `postal_address` object includes the customer’s postal address. This is used to determine the applicable market region and/or network fees, if relevant.
+
+The optional `contract_term` object includes information about the customer’s contract start and end dates. This information will be used to determine the date from when the customer tariff must be synchronised and to remind the customer to re-establish the tariff connection on the contract renewal date.
+
+The optional `terms_url` can include the URL to your terms and conditions page shown (and accepted) by the customer during their session. Flatpeak will store this URL along with the transaction timestamp for reference.
+
+</Info>
+
+<CodeGroup>
+
+```json Request
+curl --request PUT \
+--url 'https://api.flatpeak.com/connect/auth_capture/{connect_token}' \
+  --header 'Authorization: Basic <encoded-value>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "auth_data": {
+      "access_token": "476dfc58-fd6a-4a32-9483-7dd9b8126c6e",
+      "user_prefix": "EYR43EUT-1"
+    },
+    "postal_address": {
+      "address_line1": "1-3",
+      "address_line2": "Strand",
+      "city": "London",
+      "post_code": "WC2N 5EH",
+      "country_code": "GB"
+    },
+    "contract_term": {
+      "start_date": "2023-01-01T00:00:00Z",
+      "end_date": "2024-01-01T00:00:00Z"
+    },
+    "terms_url": "https://acme.com/terms"
+  }'
+```
+
+```json Response
+{
+  "connect_token": "cot_68541c4c407600f62fd98a97",
+  "direction": "IMPORT",
+  "live_mode": true,
+  "status": "accepted"
+}
+```
+
+</CodeGroup>
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step title="Redirect customer back to Flatpeak">
+
+Once you’ve submitted the session status to the Flatpeak API, redirect the customer’s browser to the `connect_web_uri` provided in the **Session Context** response, append the `connect_token`.
+
+<CodeGroup>
+
+```http Redirect
+https://auth.direct.flatpeak.com?connect_token=cot_68541c4c407600f62fd98a97
+```
+
+```http Response
+HTTP/1.1 200 OK
+```
+
+</CodeGroup>
+</Step>
+
+</Steps>
+
+### 2. Tariff polling
+
+Flatpeak will implement custom logic to fetch tariff data from your customer’s account based on your integration requirements, using the credentials provided in the `auth_data` object to authenticate requests.
+
+This request shall retrieve the customer’s tariff, and we expect the response to include the following objects (in your own format):
+
+- **Customer tariff** – include tariff data covering at least the next 24 hours.
+- **Contract Start Date** – used to backfill tariff data for historical reporting.
+- **Contract End Date** (optional) – used to trigger reminders for the customer to reconnect or update their tariff before it expires.
+
+Flatpeak polls the endpoint regularly, typically every 1–2 days, to retrieve the latest tariff data. You can define the allowed polling frequency and specify the token renewal mechanism.
+
+## Not ready to integrate?
+
+If your organisation isn’t ready to integrate with Flatpeak, we would still love to include your tariffs in our library. This helps your customers easily select their tariff when enabling energy cost features on their devices. Please contact our team via the link at the top of this page to arrange an introductory call.

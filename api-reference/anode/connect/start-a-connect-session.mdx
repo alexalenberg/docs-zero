@@ -1,0 +1,48 @@
+---
+title: 'Start a connect session'
+icon: 'rocket-launch'
+sidebarTitle: "1. Start session"
+description: Start a new session with Connect API.
+tag: "Upd"
+---
+
+<Steps>
+<Step title="Subscribe to session complete event">
+Go to the Dashboard [Webhooks](https://dashboard.flatpeak.com/webhooks) page and subscribe to the `connect.session.complete` event. This enables your backend to receive notifications when a tariff is connected, so you can start fetching tariff rates and using other energy scheduling and cost reporting endpoints.
+
+This step only needs to be completed once.
+
+</Step>
+
+<Step title="Call Connect URL">
+Make a request to the Connect URL as shown in this example:
+
+<CodeGroup>
+```json Your request
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "<connect_token>",
+  "route": "session_start"
+}'
+```
+</CodeGroup>
+
+ The response will be one of the predefined pages listed below. Your application must support handling all of these pages.
+ </Step>
+ </Steps>
+
+<Tip>The `BACK` action is available on every page, it lets customers reliably return to the previous step.</Tip>
+
+<CodeGroup>
+```json Your request
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "<connect_token>",
+  "action": "BACK"
+}'
+```
+</CodeGroup>

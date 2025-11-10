@@ -1,0 +1,79 @@
+---
+title: 'Failed tariff connection'
+icon: 'link-simple-slash'
+sidebarTitle: "11. Failed connection"
+description: Informs the customer that the tariff connection has failed.
+tag: "Upd"
+---
+
+When Connect is unable to access the customer's tariff, it will return to this page.
+
+**Page actions explained:**
+
+  | Action          | Result                                              |
+  | :-------------- | :-------------------------------------------------- |
+  | `EDIT`          | Restarts the flow from the Provider Selection page. |
+  | `DISCONNECT`    | Disconnects the tariff and completes the session.   |
+
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/12-tariff-summary-failed.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_connection_failed",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "actions": [
+    "EDIT",
+    "DISCONNECT",
+    "BACK"
+  ],
+  "data": {
+    "connection_type": "DIRECT",
+    "provider": {
+      "id": "prv_65b78bbdd8e83b06a60e38c2",
+      "display_name": "Octopus Energy",
+      "logo_url": "https://s.flatpeak.com/83b06a60e38c2.png"
+    }
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_connection_failed",
+  "action": "DISCONNECT"
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_tariff_failed",
+  "action": "BACK"
+}'
+```
+</CodeGroup>
+
+Connect may return any of the following request validation errors:
+
+| Error Code         | Error Description                     |
+| ------------------ | ------------------------------------- |
+| `action_missing`   | Action parameter is required.         |
+| `action_invalid`   | Action parameter XX is not supported. |
+
+</Tab>
+</Tabs>

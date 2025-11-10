@@ -1,0 +1,193 @@
+---
+title: 'Tariff summary display & tariff management'
+icon: 'chart-simple'
+sidebarTitle: "12. Tariff display & edit"
+description: Displays tariff summary and provides controls to manage tariff connection.
+---
+
+Once the customer's tariff has been captured, they will be shown its summary on the final page, where they can review, update, or disconnect it.
+
+**Page actions explained:**
+
+| Action       | Result                                                                        |
+| ------------ | ------------ |
+| `SAVE`       | Saves the tariff and completes the session. |
+| `EDIT`       | Restarts the flow from the Provider Selection page. |
+| `DISCONNECT` | Disconnects the tariff and completes the session. |
+
+The tariff summary page has two versions, the choice of which depends on the tariff's structure. Connect will automatically select the correct version of the page.
+
+<Steps>
+
+<Step title="`FIXED` tariff">
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/11-tariff-summary-fixed-rate.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_fixed_confirm",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "SAVE",
+    "EDIT",
+    "DISCONNECT"
+  ],
+  "data": {
+    "connection_type": "DIRECT",
+    "currency_code": "GBP",
+    "provider": {
+      "id": "prv_65b78bbdd8e83b06a60e38c2",
+      "display_name": "Octopus Energy",
+      "logo_url": "https://s.flatpeak.com/83b06a60e38c2.png"
+    },
+    "tariff": {
+      "name": "Fixed Term 2024",
+      "structure_type": "FIXED",
+      "contract_end_date": "2024-12-30T00:00:00+02:00",
+      "tiered": false
+    },
+    "cost": 0.246
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_fixed_confirm",
+  "action": "SAVE"
+}'
+```
+</CodeGroup>
+
+<Info>The `tariff.structure` in Connect response will always have `FIXED` value as this page is returned when the tariff rate is fixed (i.e. flat).</Info>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code         | Error Description                     |
+| ------------------ | ------------------------------------- |
+| `action_missing`   | Action parameter is required.         |
+| `action_invalid`   | Action parameter XX is not supported. |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+<Note>Note, time is returned in RFC3339 format with offset. i.e. 2024-06-15T03:12:00+02:00</Note>
+
+</Tab>
+</Tabs>
+</Step>
+
+<Step title="`TIME_OF_DAY` or other dynamic tariff">
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/12-tariff-summary-dynamic-market.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_tou_confirm",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "SAVE",
+    "EDIT",
+    "DISCONNECT"
+  ],
+  "data": {
+    "connection_type": "MARKET",
+    "currency_code": "GBP",
+    "market_rates_source": true,
+    "provider": {
+      "id": "prv_65de48b2977276d02acdb481",
+      "display_name": "Good Energy",
+      "logo_url": "https://s.flatpeak.com/7276d02acdb481.png"
+    },
+    "tariff": {
+      "name": "Flex Next Go",
+      "structure_type": "MARKET",
+      "contract_end_date": "2024-06-15T00:00:00+02:00",
+      "tiered": false
+    },
+    "rates": {
+      "yesterday": [],
+      "today": [
+        {
+          "valid_from": "2024-02-01T00:00:00+02:00",
+          "valid_to": "2024-02-01T22:00:00+02:00",
+          "tariff": {
+            "cost": 0.12,
+            "confidence": 1
+          }
+        },
+        {
+          "valid_from": "2024-02-01T22:00:00+02:00",
+          "valid_to": "2024-02-01T00:00:00+02:00",
+          "tariff": {
+            "cost": 0.09,
+            "confidence": 1
+          }
+        }
+      ],
+      "tomorrow": [
+        {
+          "valid_from": "2024-02-02T00:00:00+02:00",
+          "valid_to": "2024-02-02T06:00:00+02:00",
+          "tariff": {
+            "cost": 0.09,
+            "confidence": 1
+          }
+        },
+        {
+          "valid_from": "2024-02-02T06:00:00+02:00",
+          "valid_to": "2024-02-03T00:00:00+02:00",
+          "tariff": {
+            "cost": 0.12,
+            "confidence": 1
+          }
+        }
+      ]
+    }
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "summary_tou_confirm",
+  "action": "SAVE"
+}'
+```
+</CodeGroup>
+
+<Info>The value of `tariff.structure` in Connect response may be: `TIME_OF_DAY` - a tariff that varies based on specific times of day or other cyclical factors (e.g., day of the week, month, or season); `MARKET` - a tariff based on the market rate; `DYNAMIC` - a continuously changing tariff that is not directly tied to the market rate.</Info>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code         | Error Description                     |
+| ------------------ | ------------------------------------- |
+| `action_missing`   | Action parameter is required.         |
+| `action_invalid`   | Action parameter XX is not supported. |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+<Note>Note, time is returned in RFC3339 format with offset. i.e. 2024-06-15T03:12:00+02:00</Note>
+
+</Tab>
+</Tabs>
+</Step>
+
+</Steps>

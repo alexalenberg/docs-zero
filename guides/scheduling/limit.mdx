@@ -1,0 +1,18 @@
+---
+title: Schedule by price limit
+sidebarTitle: "By price limit"
+---
+
+Want to create a schedule that follows the energy price range (i.e., only use energy when the price is below €0.05/kWh), call the [scheduling-limit](/api-reference/zero/slots/get-slots-threshold) API endpoint.
+
+Flatpeak will use the Location tariff and, if present, data on [local generation](/guides/reporting/local-generation) to find all time slots that fit your requested tariff level (high or low). You must specify either the `relative` or `absolute` parameter.
+
+```json5 Example Request
+curl --request GET \
+  --url 'https://api.flatpeak.com/slots/threshold/loc_641b90b758fb8e6293716e40
+  ?start_time=2023-06-15T09:00:00Z
+  &end_time=2023-06-15T13:00:00Z
+  &absolute=0.05
+  &segment=LOW' \
+  --header 'Authorization: Bearer <token>'
+```

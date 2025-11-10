@@ -1,0 +1,37 @@
+---
+title: 'Implementing Connect'
+sidebarTitle: "Introduction"
+---
+
+Connect API methods work differently from the rest of the Flatpeak API. They use a single endpoint (https://connect.flatpeak.com) that behaves similarly to a chatbot but uses a predefined set of requests and responses in JSON format. Here is how it works:
+
+<Steps>
+  <Step title="Initiating the Session">
+    Your customer begins a Connect session by clicking a “**Connect My Tariff**” button (or similarly named control) in your app.
+
+    Your app should then:
+      - Call the [create-connect-token](/api-reference/zero/connect/create-a-connect-token) endpoint to generate a `connect_token`
+      - Use the token to start a new session with the **Connect HTTP endpoint**
+  </Step>
+  <Step title="Receiving Page Objects">
+    Once the session starts, your app will receive **one of fifteen possible Page Objects**.
+    Each object contains all the necessary information to render a page that guides the customer through the next step in the connection process.
+  </Step>
+  <Step title="Handling Customer Actions">
+    For each page:
+    - Your app captures the user’s input
+	  - Submits the response to the Connect endpoint
+	  - Receives the **next JSON object** to render the next step
+    Connect dynamically determines the appropriate next page based on the customer’s previous answers.
+  </Step>
+  <Step title="Completing the Session">
+    Once the customer’s tariff is successfully connected:
+	    - Connect returns a special `session_complete` object
+	    - A **webhook is triggered** to notify your backend systems that:
+	      - The session is complete
+        - You can now exchange the `connect_token` for a permanent `location_id` that represents a property address
+  </Step>
+  <Step title="After completing the Session">
+    You can now begin querying the Flatpeak API for tariff data and other services
+  </Step>
+</Steps>

@@ -1,0 +1,23 @@
+---
+title: Pagination
+---
+
+Many top-level API resources support bulk fetches via "list" API methods. For instance, you can list customers, locations, and devices. These list API methods share a common structure and support at least three parameters: `limit`, `starting_after`, and `ending_before`.
+
+## Cursor-based Pagination
+
+All List methods utilise cursor-based pagination via the `starting_after` and `ending_before` parameters.
+
+Both parameters take object ID values and return objects in reverse chronological order.
+
+- The ending_before parameter returns objects listed before the named object.
+- The starting_after parameter returns objects listed after the named object.
+
+These parameters are mutually exclusive - only starting_after or ending_before may be specified in one request.
+
+```bash Example request
+curl --request GET \
+     --url 'https://api.flatpeak.com/events?ending_before=evt_63f1fb4ba346963088070eb4' \
+     --header 'accept: application/json' \
+     --header 'authorization: Bearer <token>'
+```

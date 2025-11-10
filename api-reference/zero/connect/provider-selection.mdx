@@ -1,0 +1,171 @@
+---
+title: 'Provider (supplier) selection'
+icon: 'utility-pole'
+sidebarTitle: "2. Provider selection"
+description: Customer selects their energy provider from the list or via manual input.
+---
+
+This step collects lets customer to select their energy provider from a pre-populated list. If their provider isn’t listed, they can manually enter its name. This step allows the service to target the correct upstream provider for tariff retrieval.
+
+<Steps>
+  <Step title="From the list">
+  Returns the list of energy providers that serve the postal address provided earlier. Customer can select their current provider. If customers find their provider missing from the list, they can select the `PROVIDER_MISSING` action.
+<Tabs>
+  <Tab title="Preview">
+
+<Frame>
+  <img src="/images/02-select-your-provider-with-address.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_select",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "ADDRESS_CHANGE",
+    "PROVIDER_MISSING"
+  ],
+  "data": {
+    "postal_address": {
+      "address_line1": "1-3",
+      "address_line2": "Strand",
+      "city": "London",
+      "state": "Greater London",
+      "post_code": "WC2N 5EH",
+      "country_code": "GB"
+    },
+    "providers": [
+      {
+        "id": "prv_65b78bbdd8e83b06a60e38c2",
+        "display_name": "British Gas",
+        "logo_url": "https://s.flatpeak.com/83b06a60e38c2.png"
+      },
+      {
+        "id": "prv_64b83f455cb6e881442244f8",
+        "display_name": "EDF Energy",
+        "logo_url": "https://s.flatpeak.com/6e881442244f8.png"
+      }
+    ]
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_select",
+  "data": {
+    "provider": {
+      "id": "prv_65b78bbdd8e83b06a60e38c2"
+    }
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_select",
+  "action": "PROVIDER_MISSING"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                | Error Description                                         |
+| ------------------------- | --------------------------------------------------------- |
+| `provider_id_missing`     | Provider ID is required.                                  |
+| `provider_not_found`      | Provider ID prv_XX not found.                             |
+| `provider_id_invalid`     | Provider ID prv_XX is not available at your address (XX). |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>
+
+  </Step>
+
+  <Step title="Manual entry">
+      In the rare event that a provider's name was not in the list on the previous page, the customer can indicate this and enter the name of their provider manually.
+
+      <Note>We advise you to render the `postal_address` object on the page and include an action button that will enable the customer to change their address - often, the provider is missing from the list because the address is wrong.</Note>
+<Tabs>
+  <Tab title="Preview">
+
+<Frame>
+  <img src="/images/03-your-provider-name.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_name_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "ADDRESS_CHANGE"
+  ],
+  "data": {
+    "postal_address": {
+      "address_line1": "1-3",
+      "address_line2": "Strand",
+      "city": "London",
+      "state": "Greater London",
+      "post_code": "WC2N 5EH",
+      "country_code": "GB"
+    },
+    "provider": {
+      "name": ""
+    }
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_name_capture",
+  "data": {
+    "provider": {
+      "name": "Acme Provider"
+    }
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "provider_name_capture",
+  "action": "ADDRESS_CHANGE"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                | Error Description                      |
+| ------------------------- | -------------------------------------- |
+| `provider_name_missing`   | Provider name is required.             |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>
+
+</Step>
+
+</Steps>

@@ -1,0 +1,64 @@
+---
+title: Test (sandbox) mode
+sidebarTitle: "Test (sandbox) mode"
+---
+
+Test (aka sandbox) mode is an isolated environment in your Flatpeak account that enables you to develop and test your integration without affecting your production data.
+
+### What is test mode
+
+In test mode, you can use all Flatpeak services and create real objects in the API. Because test data is fully separated, you can use test mode to try various scenarios, knowing your production data will not be affected.
+
+### When to use test mode
+
+We recommend you use test mode during initial integration, development, and testing.
+
+You may also find it helpful to switch to Test mode after launching Flatpeak to validate your implementation, especially when dealing with many objects that might be billable in Live mode.
+
+### Test mode billing
+
+Test mode is billed the same as live mode.
+
+### Switching between test and live modes
+
+Both modes use the same API endpoints. The required mode is automatically determined using the **test** or **live** mode API Key.
+
+- All Test mode keys have the prefix **sk_test_**
+- API will return test mode objects with "live_mode" parameter set to `false`.
+
+Test mode API key example:
+
+``` text
+sk_test_687b8977879fd796a86faa03
+```
+
+Live mode API key example:
+
+``` text
+sk_live_65e88ad8b13031c26a39c06c
+```
+
+Test and Live mode API response objects. The **test** object has `"live_mode": false`
+
+<CodeGroup>
+
+```json TEST mode response
+{
+  "id": "rts_65e42cdd73e9f861edda35d7",
+  "object": "tariff_rate",
+  "live_mode": false,
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "data": [ ... ]
+}
+```
+```json LIVE mode response
+{
+  "id": "rts_65e42cdd73e9f861edda35d7",
+  "object": "tariff_rate",
+  "live_mode": true,
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "data": [ ... ]
+}
+```
+
+</CodeGroup>

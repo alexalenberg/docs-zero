@@ -1,0 +1,82 @@
+---
+title: 'Surcharge capture'
+icon: 'money-bill-trend-up'
+sidebarTitle: "8. Surcharge capture"
+description: Customer enters their tariff surcharges.
+tag: "New"
+---
+
+If customers enter their tariff rate manually, depending on their choices, Connect may, depending on your customer's energy provider, request you to render a page where they can specify tariff rate surcharges. For example, they might be on a `MARKET` tariff and will be paying additional brokerage fees or taxes on top.
+
+<Note>Surcharges are applied by first adding the fixed fee, then applying the percentage to the result.</Note>
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/07-surcharges.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "surcharge_capture",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "actions": [
+    "BACK"
+  ],
+  "data": {
+    "currency_code": "EUR",
+    "provider": {
+      "id": "prv_65de3024be51ded101a3a555",
+      "display_name": "EDF",
+      "logo_url": "https://s.flatpeak.com/1ded101a3a555.png"
+    },
+    "surcharge": {
+      "fixed": 0,
+      "percentage": 0
+    }
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "surcharge_capture",
+  "data": {
+    "surcharge": {
+      "fixed": 0.345,
+      "percentage": 18.50
+    }
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "surcharge_capture",
+  "action": "BACK"
+}'
+```
+</CodeGroup>
+
+<Warning>`surcharge.fixed` shall be returned in **large** currency units.</Warning>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                     | Error Description                                                   |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `surcharge_percentage_invalid` | Surcharge percentage must be larger than zero.                      |
+| `data_json_invalid`            | Data does not conform to the JSON schema.                               |
+
+</Tab>
+</Tabs>

@@ -1,0 +1,61 @@
+---
+title: Errors
+sidebarTitle: "Errors"
+---
+
+Flatpeak uses HTTP status codes to indicate the success or failure of requests.
+
+This includes:
+
+  | Code       | Description                                                                     |
+  | ---------- | --------------------------------------- |
+  | `2XX`      | Indicates success.                      |
+  | `4XX`      | Indicates an invalid request. (error type: `invalid_request`)           |
+  | `5XX`      | indicates Flatpeak-related issues (error type: `api_error`).      |
+
+
+### Error object
+
+When an error needs to be returned in an API response, Flatpeak uses a standardised error object across all endpoints:
+
+```json
+{
+  "object": "error",
+  "live_mode": false,
+  "context": "connect.postal_address_capture",
+  "type": "invalid_request",
+  "code": "country_code_missing",
+  "message": "Country code is required",
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "time_created": "2022-01-24T14:15:22.003"
+}
+```
+
+| Property             | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| `object`          | Indicates API object type, i.e. `error`.                            |
+| `live_mode`       | Indicates if `live` or `test` mode API key was used.               |
+| `context`         | Indicates error context. It provides information on which service and method has failed. For example, `connect.postal_address_capture` or `api.location_create`.                                         |
+| `type`            | Indicates error type; possible values are `invalid_request` - when your request is invalid. And `api_error` when the Flatpeak service cannot process the request (these are rare).             |
+| `code` | Connect-related error codes are listed in the Connect section of [api reference](/api-reference/zero/connect/) under the code sample of every page. General API-related error codes are listed in the API error codes table later on this page. Example: `country_code_missing`.         |
+| `message`         | Error description in the English language. Example: `Country code is required`.                       |
+| `connect_token` | The Connect token used to make the request resulted in an error.               |
+| `time_created`    | Timestamp when this error occurred.                            |
+
+### Account disabled error
+
+When your account is out of subscription or is disabled for any other reason, you will receive an error `422` when trying to access any of the [API](/api-reference/) endpoints.
+
+```json
+{
+  "object": "error",
+  "live_mode": true,
+  "context": "api.tariff_create",
+  "type": "api_error",
+  "code": "account_disabled",
+  "message": "Your account is disabled",
+  "time_created": "2024-05-16T17:41:50Z",
+}
+```
+
+When it happens, open [Dashboard](https://dashboard.flatpeak.com) and go to Settings > Billing to restore your subscription.

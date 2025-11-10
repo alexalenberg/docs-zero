@@ -1,0 +1,227 @@
+---
+title: Quickstart
+---
+
+This guide will walk you through the process of trying Flatpeak service for the first time.
+
+## 1. Get a Dashboard account
+
+Before you begin, make sure to [create an account](https://flatpeak.com/signup) and complete onboarding. Once completed, you'll be able to access your API keys.
+
+<Frame>
+  <img
+    src="/images/dashboard-apikeys-light.png"
+    alt="Flatpeak Dashboard API Keys"
+    className="block dark:hidden"
+  />
+  <img
+    src="/images/dashboard-apikeys-light.png"
+    alt="Flatpeak Dashboard API Keys"
+    className="hidden dark:block"
+  />
+</Frame>
+
+Use test (sandbox) mode keys for your development.
+
+<Tip>
+  Before you continue, invite your team members to join your Flatpeak account.
+  Go to **Dashboard** > **Settings** > **Team**, and add their emails. They’ll
+  receive an automatic invitation.
+</Tip>
+
+## 2. Try Connect flow
+
+<Steps>
+<Step title="Clone our repo and install the required dependencies">
+
+```bash
+git clone https://github.com/flat-peak/flatpeak-connect-web.git
+cd flatpeak-connect-web
+npm install
+```
+
+</Step>
+<Step title="Configure Environment Variables">
+```bash
+export CONNECT_API_URL=https://connect.flatpeak.com
+```
+<Info>If you are on Windows, ensure you appropriately set env variables for your shell.</Info>
+</Step>
+<Step title="Launch locally">
+```bash
+npm run dev
+```
+A local preview will be available at `http://localhost:7070`.
+
+<Note>
+  You can also use the Flatpeak-hosted version at
+  https://connect-web.flatpeak.com. If you choose this option, replace
+  http://localhost:7070 with this URL in the steps below.
+</Note>
+
+<Frame>
+  <img src="/images/connect-web-local-clean.png" />
+</Frame>
+
+Your browser will redirect to an error page. This is because you have not provided a Connect token. Ignore this error and continue following this guide.
+
+</Step>
+<Step title="Authenticate to access Flatpeak API">
+
+1. Go to the [Dashboard API section](https://dashboard.flatpeak.com/keys/api) to retrieve your Account ID and API Key. Use test (sandbox) mode key.
+2. Base64 encode the combination of `account_id:api_key` and make a request to [create-a-bearer-token](/api-reference/zero/login/create-a-bearer-token) endpoint.
+
+<CodeGroup>
+
+```bash Example Request
+  curl --request GET \
+  --url https://api.flatpeak.com/login \
+  --header 'Authorization: Basic <base64 encoded account_id:api_key>'
+```
+
+```json Example Response
+{
+  "bearer_token": "eyJhbGciOiJIUzI1NiIsInR5cC",
+  "expires_in": 3600,
+  "live_mode": true
+}
+```
+
+</CodeGroup>
+
+</Step>
+<Step title="Generate a Connect Token">
+
+<Info>
+  Flatpeak implements a single-use session token to provide access to Connect
+  API endpoints, so you don't need to expose API keys to your customer-facing
+  app
+</Info>
+
+Make a request to [create-connect-token](/api-reference/zero/connect/create-a-connect-token) endpoint to obtain a connect token.
+
+    <CodeGroup>
+    ```json Example Request
+    curl --request POST \
+    --url https://api.flatpeak.com/connect/tariff/token \
+    --header 'Authorization: Bearer <bearer_token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "connect_web_uri": "http://localhost:7070",
+      "callback_uri": "<URI to redirect after Connect completes>",
+      "postal_address": {
+        "country_code": "GB"
+      }
+    }'
+    ```
+    ```json Example Response
+    {
+      "connect_token": "cot_6587fa4362341be5b524de3b",
+      "expires_in": "86400"
+    }
+    ```
+    </CodeGroup>
+
+    <Tip>If you’re looking to prototype receiving callbacks (i.e. for `callback_uri`), we recommend using https://webhook.site, but you can use any other service.</Tip>
+
+</Step>
+<Step title="Open the Connect app with Token">
+
+On your computer, where you already have Flatpeak connect code running locally, open: `http://localhost:7070?fp_cot=cot_***`. Replace \*\*cot\_ with the `connect_token`. The resulting URI may look similar to this example:
+
+    <Frame>
+      <img src="/images/connect-local-uri-build.png" />
+    </Frame>
+
+</Step>
+<Step title="Interact with the Connect flow">
+Connect will present you with a set of pages that will let you share your tariff information. It automatically chooses the best route to discover your tariff based on the availability of provider APIs, data-sharing regulations and frequency of provider use within the Flatpeak base.
+
+<Frame>
+  <img src="/images/connect-overview.png" />
+</Frame>
+
+<Tip>
+  The quickest way to test the Connect flow is with your own account from a
+  supported energy provider. Just select that provider during the flow. Don’t
+  have access to a compatible account? Contact
+  [support](https://flatpeak.com/support) and we’ll provide one for testing.
+</Tip>
+
+</Step>
+<Step title="Receive callback">
+
+Once click **Save** button on **Your Tariff** screen, Connect will send the following to `callback_uri` you specified:
+
+```http Example callback
+https://webhook.site/4623e56fc5c1?fp_cot=cot_6587fa4362341be5b524de3b
+```
+
+</Step>
+<Step title="Exchange completed Connect token for Location ID">
+
+Once you received a callback and using `connect_token` as a reference, call [exchange-connect-token](/api-reference/zero/connect/exchange-a-connect-token) endpoint to obtain a `location_id` that represents a permanent identifier of a property address in Flatpeak. In the future you will store it in your database in reference to the physical location of your customer's property.
+
+<CodeGroup>
+    ```bash Example Request
+    curl --request GET \
+    --url 'https://api.flatpeak.com/connect/tariff/token?connect_token=cot_6587fa4362341be5b524de3b' \
+    --header 'Authorization: Bearer <token>'
+    ```
+    ```json Example Response
+  {
+    "id": "cot_6587fa4362341be5b524de3b",
+    "object": "connect_token",
+    "location_id": "loc_641b90b758fb8e6293716e40"
+  }
+    ```
+    </CodeGroup>
+
+</Step>
+
+<Step title="Get tariff rates">
+ You can now query the [tariff-rates](/api-reference/zero/tariffs/get-tariff-rates) API endpoint to obtain tariff data.
+
+<CodeGroup>
+    ```bash Example Request
+    curl --request GET \
+  --url 'https://api.flatpeak.com/tariffs/rates/loc_641b90b758fb8e6293716e40?start_time=2023-06-15T09:00:00Z&end_time=2023-06-15T13:00:00Z&include_tariff=true' \
+  --header 'Authorization: Bearer <token>'
+    ```
+    ```json Example Response
+    {
+      "object": "tariff_rate",
+      "location_id": "loc_641b90b758fb8e6293716e40",
+      "location_timezone": "Europe/Amsterdam",
+      "currency_code": "EUR",
+      "direction": "IMPORT",
+      "request": {
+        "include_tariff": true,
+        "direction": "IMPORT",
+        "start_time": "2023-06-15T09:00:00Z",
+        "end_time": "2023-06-15T13:00:00Z"
+      },
+      "data": [
+        {
+        "start_time": "2023-06-15T09:00:00Z",
+        "end_time": "2023-06-15T11:00:00Z"
+          "tariff": {
+            "rate": 14.998,
+            "confidence": 1
+          }
+        },
+        {
+        "start_time": "2023-06-15T11:00:00Z",
+        "end_time": "2023-06-15T03:00:00Z"
+          "tariff": {
+            "rate": 23.072,
+            "confidence": 1
+          }
+        }
+      ]
+    }
+    ```
+    </CodeGroup>
+
+</Step>
+</Steps>

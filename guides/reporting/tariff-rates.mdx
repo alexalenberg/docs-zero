@@ -1,0 +1,37 @@
+---
+title: Obtaining raw tariff rates
+sidebarTitle: "Raw tariff rates"
+---
+
+Use the [tariff-rates](/api-reference/zero/tariffs/get-tariff-rates) endpoint, along with a `location_id`, to retrieve detailed, time-series energy price data for your customer’s address. This allows your systems to access accurate energy cost information within any desired time window.
+
+### 1. Response Data Format
+
+The API returns tariff data as a time-series dataset, similar to a stock feed. While it may seem verbose for flat-rate tariffs, this format provides a universal integration approach, primed for any tariff variations such as time-of-use, dynamic or tiered tariffs.
+
+### 2. Units, Precision & Rounding
+
+- All monetary values are returned in **major** currency units.
+- Tariff rates may have up to 5 decimal places, such as 0.12345.
+- To prevent UI issues, implement rounding - [code example](https://github.com/flat-peak/flatpeak-connect-web/commit/0d6ffaa31eab5308f5cdf57a1888234915b9459c). ￼
+
+### 3. Data Refresh Strategy
+
+- Each API response includes a `next_update` timestamp, indicating when new data will likely be available.
+- Use this field to drive rate caching in your systems.
+- If you are unable to use `next_update`, a safe fallback is to pull updates at 23:00 **local time**.
+
+### 4. Handling Timezones and Daylight Saving Time (DST)
+
+Refer to [Timezones & DST](/guides/system/timezones) guide to learn how to sedign your integraiton to correctly handle Timezones and Daylight Saving Time changes
+
+See the [Timezones & DST](/guides/system/timezones) guide for best practices on handling timezones and daylight saving time in your integration.
+
+## Summary
+
+| Feature           | Recommendation / Notes                                                    |
+|:------------------|:----------------------------------------------------------------------------|
+| Data Format       | Always a time-series — flexible for flat or complex tariff structures     |
+| Precision         | Up to 5 decimals — round when presenting                    |
+| Refresh Handling  | Use `next_update` to schedule re-fetch                 |
+| DST Handling      | Use RFC3339 timestamps; `end_time` offset governs result timestamps       |

@@ -1,0 +1,85 @@
+---
+title: 'Library selection'
+icon: 'book'
+sidebarTitle: "4. Library selection"
+description: Customer selects their tariff from a Flatpeak-provided library.
+---
+
+Your customer selects their tariff from a Flatpeak-provided library that is pre-filtered by Provider and Location (postal address). If customers find their tariff missing from the list, they can select the `TARIFF_MISSING` action.
+
+<Tabs>
+  <Tab title="Preview">
+
+<Frame>
+  <img src="/images/04-select-your-tariff.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_select",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "actions": [
+    "TARIFF_MISSING"
+  ],
+  "data": {
+    "provider": {
+      "id": "prv_65de3071e0c5570f767f06f1",
+      "display_name": "SSE",
+      "logo_url": "https://s.flatpeak.com/570f767f06f1.png"
+    },
+    "tariffs": [
+      {
+        "id": "trt_8587fa49c7e5297ccc6c57e4",
+        "name": "EV Energy Plan",
+        "description": "November 2022 tariff"
+      },
+      {
+        "id": "trt_6587fa49c7e5297ccc6c57e7",
+        "name": "Next Flex 2023 (37p/11.2p)",
+        "description": ""
+      }
+    ]
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_select",
+  "data": {
+    "tariff": {
+      "id": "trt_8587fa49c7e5297ccc6c57e4"
+    }
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_select",
+  "action": "TARIFF_MISSING"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code          | Error Description                                      |
+| ------------------- | ------------------------------------------------------ |
+| `tariff_id_missing` | Tariff ID is required.                                 |
+| `tariff_not_found`  | Tariff ID trf_XX not found.                            |
+| `tariff_id_invalid` | Provider ID prv_XX does not support tariff ID trf_XX.  |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+  </Tab>
+</Tabs>

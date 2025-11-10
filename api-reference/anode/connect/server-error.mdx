@@ -1,0 +1,33 @@
+---
+title: 'Server error'
+icon: 'triangle-exclamation'
+sidebarTitle: "13. Server error"
+description: This page is returned when an error has occurred inside the Connect service.
+---
+
+This page is returned when an error occurs in the Connect service. When this happens, we recommend rendering the page below and providing the customer with a way to return to the previous page.
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/20-error.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<Note>contract_end_date` shall be returned in in RFC3339 format e.g. 2024-06-15T00:00:00Z. i.e. UTC.</Note>
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "object": "error",
+  "live_mode": false,
+  "context": "connect.<route_name_where_error_occurred>",
+  "type": "connect_error",
+  "code": "server_error",
+  "message": "A server error has occurred.",
+  "time_created": "2024-01-24T14:15:22.003"
+}
+```
+</CodeGroup>
+</Tab>
+</Tabs>

@@ -1,0 +1,33 @@
+---
+title: Provider integration task description
+sidebarTitle: "Provider integration task description"
+noindex: true
+mode: "center"
+---
+
+### Overview
+Develop a web scraping script to log into an energy provider’s end-user dashboard using provided credentials and extract the following tariff details:
+
+- **Tariff Name**
+- **Contract Start Date** (if available)
+- **Contract End Date** (if available)
+- **Tariff Rates** applicable to the user's agreement
+
+### Technical requirements
+- The script should be implemented in **Node.js**.
+- Use **fetch, axios, or any other suitable HTTP library**.
+- If direct requests are blocked (e.g., CAPTCHA, JS auth), use a **headless browser (Puppeteer/Playwright) as fallback**.
+- The extracted data should be structured as a JSON object.
+- Error handling should be implemented for login failures, session timeouts, and data extraction errors.
+- The code should be modular and reusable.
+
+### Deliverables
+- Well-documented Node.js script
+- Run instructions (including dependencies)
+- Any required config files (e.g., .env for credentials)
+- Example output JSON
+
+### Additional notes
+- **Use a VPN with a server in the provider’s country during development.**
+- Use provider API access for tariffs if available (preferred over scraping).
+- Design for **scalability and maintainability**.

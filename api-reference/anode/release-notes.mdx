@@ -1,0 +1,56 @@
+---
+title: 'Release Notes - 2025-09-14.anode'
+sidebarTitle: "Release Notes"
+---
+
+## Core data services
+
+- 48-hour tariff forecasts across European regions
+- Export market rate support for Europe
+- Webhook notifications for raw tariff rate updates — replacing the [next_update](/api-reference/zero/tariffs/get-tariff-rates#response-next-update) flag for real-time event delivery.
+
+## Scheduling
+
+All endpoints are transitioned to POST and uniformed
+
+- The slots-threshold (GET) endpoint has been replaced by a [time duration](/api-reference/anode/schedules/schedule-by-duration) POST endpoint.
+It includes a new URI, updated object ID prefix, a new object name, and the maxiumum period between start_time and end_time is now 3 days.
+
+- The Slots-time (GET) endpoint has been replaced by a [price limit](/api-reference/anode/schedules/schedule-by-limit) POST endpoint.
+It includes a new URI, updated object ID prefix, a new object name, and the maximum period between start_time and end_time is now 3 days.
+
+- The Schedules endpoint is now [amount of energy](api-reference/anode/schedules/schedule-by-amount) POST endpoint.
+It includes a new URI, updated object ID prefix, and a new object name.
+
+## Connect
+
+**Token Create**
+
+- Added `disconnect_tariff` action to disconnect a tariff without launching Connect.
+- Added `route_options` to enable omitting [tariff name capture](api-reference/anode/connect/tariff-name-capture) and [contract term capture](/api-reference/anode/connect/contract-term-capture).
+- New optional [advanced tariff capture](/api-reference/anode/connect/advanced-tariff-capture) page is added for complex commercial tariffs.
+- The `connect_web_uri` is renamed to `connect_url` for clarity of function.
+
+
+**Updates to page route naming**
+
+- The route for [pending tariff connection](/api-reference/anode/connect/tariff-connection-pending) page is now called `tariff_connection_pending`.
+- The route for [[failed tariff connection](/api-reference/anode/connect/tariff-connection-failed)] page is now called `tariff_connection_failed`.
+
+**Tariff summary**
+
+- New **Report a problem** action for end-users to flag incorrect tariffs is introduced.
+- Rates are now displayed in **small** currency units (API continues to return **large** currency units).
+
+**Other improvements**
+
+- In [start session](/api-reference/anode/connect/start-a-connect-session): `session_start` now replaces `session_restore`.
+- `BACK` action added to all pages to provide more reliable navigation.
+- **Market surcharge** has been replaced with [surcharge capture](/api-reference/anode/connect/surcharge-capture) and [region selection](/api-reference/anode/connect/region-selection) pages.
+- Navigation actions in [tariff summary](/api-reference/anode/connect/tariff-summary), [pending tariff connection](/api-reference/anode/connect/tariff-connection-pending) and [failed tariff connection](/api-reference/anode/connect/tariff-connection-failed) are simplified for easier navigation.
+- **Session complete** page has been retired.
+- `postal_address_type` variable added to [connect token create](/api-reference/anode/connect/create-a-connect-token). Filters providers and tariffs by RESIDENTIAL or COMMERCIAL. Auto-detected if unspecified.
+
+## Errors
+
+- All endpoints, including Connect, now return `400 Bad Request` instead of `409 Conflict` for validation errors.

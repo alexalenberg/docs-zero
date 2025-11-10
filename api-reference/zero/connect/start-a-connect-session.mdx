@@ -1,0 +1,22 @@
+---
+title: 'Start a connect session'
+icon: 'rocket-launch'
+sidebarTitle: "Start a session"
+description: Start a new or restore an existing session with Connect service.
+---
+
+Make a request to the Connect URL as shown in this example:
+
+<CodeGroup>
+```json Your request
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "<connect_token>",
+  "route": "session_restore"
+}'
+```
+</CodeGroup>
+
+ The response will be one of the predefined pages (1 to 13) listed below and [complete-a-session](/api-reference/zero/connect/complete-a-connect-session) webhook. Your application must support handling all of these pages.

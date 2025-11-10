@@ -1,0 +1,52 @@
+---
+title: Events
+---
+
+You will notice that events follow a pattern: `resource.event`. Our goal is to provide a consistent system that makes things easier to anticipate and code against.
+
+## Filtering Events
+
+Events can be filtered to only show a single type using the `event_type` query parameter.
+
+```bash Example request
+curl --request GET \
+     --url 'https://api.flatpeak.com/events?event_type=location.create' \
+     --header 'accept: application/json' \
+     --header 'authorization: Bearer <token>'
+```
+
+## Event Types
+
+This is a list of all the types of events currently available from the [events](/api-reference/zero/events/list-all-events) API endpoint.
+
+We may add more at any time, so you should not assume that only these types exist when developing and maintaining your code.
+
+| Event                      | Description                                                           |
+| :-------------------------- | :-------------------------------------------------------------------- |
+| `connect.session.complete`  | Occurs whenever a Connect session is completed and rates are available. Available in Anode release onwards. |
+| `customer.create`           | Occurs whenever a customer is created.                                |
+| `customer.delete`           | Occurs whenever a customer is deleted.                                |
+| `customer.update`           | Occurs whenever a customer is updated.                                |
+| `customer.create.failed`    | Occurs when customer creation has failed.                             |
+| `customer.delete.failed`    | Occurs when customer deletion has failed.                             |
+| `customer.update.failed`    | Occurs when customer update has failed.                               |
+| `location.create`           | Occurs whenever a location is created.                                |
+| `location.delete`           | Occurs whenever a location is deleted.                                |
+| `location.update`           | Occurs whenever a location is updated.                                |
+| `location.create.failed`    | Occurs when location creation has failed.                             |
+| `location.delete.failed`    | Occurs when location deletion has failed.                             |
+| `location.update.failed`    | Occurs when location update has failed.                               |
+| `device.create`             | Occurs whenever a device is created.                                  |
+| `device.delete`             | Occurs whenever a device is deleted.                                  |
+| `device.update`             | Occurs whenever a device is updated.                                  |
+| `device.create.failed`      | Occurs when device creation has failed.                               |
+| `device.delete.failed`      | Occurs when device deletion has failed.                               |
+| `device.update.failed`      | Occurs when device update has failed.                                 |
+| `schedule.created`          | Occurs when a new schedule is created for a location (beta).          |
+| `tariff.expiring`           | Occurs when a contract term for a tariff element is expiring.         |
+| `tariff.expired`            | Occurs when a contract term for a tariff element has expired.         |
+| `tariff.fetch.failed`       | Occurs when attempts to sync a tariff element from an upstream data source (such as an energy provider account) have failed.  |
+
+## Subscribing to events via Webhooks
+
+You can subscribe to receive a webhook notification when an event occurs in your Flatpeak account. To set up, visit the webhooks section in the [Dashboard](https://dashboard.flatpeak.com/webhooks). There is also a documentation [ article](/guides/system/webhooks) explaining how to work with Flatpeak webhooks.

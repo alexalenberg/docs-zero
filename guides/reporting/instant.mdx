@@ -1,0 +1,85 @@
+---
+title: Instant cost reporting
+sidebarTitle: "Instant"
+---
+
+Flatpeak supports instant energy cost reporting at both Device and Location (i.e. property address) levels.
+
+Use device-based reporting if you are calculating cost for a specific device at a location — this allows you to add additional devices to the same location in the future without losing your data.
+
+
+<Steps>
+
+<Step title="Create device identifier (optional)">
+- Start by calling the [create-a-device](/api-reference/zero/devices/create-a-device) endpoint using your internal device reference.
+- Store the returned Flatpeak `device_id` permanently in your system.
+- This step only needs to be performed once per device.
+<CodeGroup>
+```json Example request
+curl --request POST \
+  --url https://api.flatpeak.com/devices \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "reference_id": "DEV1234567890"
+}'
+```
+```json Example response
+{
+  "id": "dev_63a6087272941ef077a8fd3e",
+  "object": "device",
+  "reference_id": "DEV1234567890"
+}
+```
+</CodeGroup>
+</Step>
+
+<Step title="Submit meter records & get cost">
+- Use the [instant-cost-calculate](/api-reference/zero/costs/instantly-calculate-energy-cost) endpoint to submit energy consumption or export meter records from your system or device.
+- Optionally include the `device_id` you created earlier — this enables tagging and tracking by device.
+<CodeGroup>
+``` json Example request
+curl --request POST \
+  --url https://api.flatpeak.com/costs/instant \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "device_id": "dev_65e6d8334c8d715963d99db3",
+  "direction": "IMPORT",
+  "tariff_rate": "IMPORT",
+  "units": "W",
+  "value": 20567,
+  "start_time": "2022-02-01T10:30:00Z",
+  "end_time": "2022-02-01T11:00:00Z"
+}'
+```
+```json Example response
+{
+  "id": "mre_65e641b570b2901d3a40199d",
+  "object": "meter_record",
+  "direction": "IMPORT",
+  "tariff_rate": "IMPORT",
+  "currency_code": "GBP",
+  "energy_units": "WH",
+  "data": {
+    "start_time": "2022-02-01T10:30:00Z",
+    "end_time": "2022-02-01T11:00:00Z",
+    "tariff": {
+      "value": 8.372,
+      "confidence": 1
+    }
+  }
+}
+```
+</CodeGroup>
+</Step>
+
+</Steps>
+
+
+## Simulating energy cost profiles
+
+To estimate energy cost without storing the data, pass the `non_persistent=true` in your request to the [instant-cost-calculate](/api-reference/zero/costs/instantly-calculate-energy-cost) endpoint.
+
+This lets you model scenarios without affecting actual meter data or triggering downstream reporting.

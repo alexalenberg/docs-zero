@@ -1,0 +1,317 @@
+---
+title: EV charger
+sidebarTitle: EV charger
+description: This guide shows how to utilise Flatpeak to optimise and report energy costs for systems such as EV chargers (EVSEs) or smart sockets.
+---
+
+<Frame>
+<img
+  src="/images/use-case-switched-system.png"
+/>
+</Frame>
+
+## Design
+
+#### To create a schedule optimised by energy cost:
+
+Once the customer completes the [Connect flow](/quickstart#2-run-connect-flow), or if you [imported their tariff](/guides/importing-your-data):
+
+- Create a default schedule that provides a fixed number of daily "on" [hours](/api-reference/zero/slots/get-slots-time) when the tariff is low (i.e. 5 hours between 8pm and 6am on the following day).
+- Allow the customer to change that schedule by setting a choice of:
+  - Number of daily "on" hours (add weekday/weekend and so on), or/and
+  - When the "on" period must end (i.e. complete charging by 6 am) or
+  - Absolute [tariff threshold](/api-reference/zero/slots/get-slots-threshold) (i.e. "on" when the tariff is below $0.15/kWh), or
+  - Relative tariff threshold (i.e. "on" when the tariff is below 40% daily average).
+
+#### To keep the schedule aligned with tariff changes:
+
+- When an energy user (i.e. an EV) connects to your device or is scheduled daily:
+  - Pass schedule settings to the API,
+  - Receive actualised schedule (slots),
+  - Apply this actualised schedule to your device.
+
+#### To log the amount of transferred energy:
+
+- During or after the energy transfer, log it to [meter records](/api-reference/zero/meters/submit-interval-meter-records) API under the IMPORT tariff.
+- Log any energy from local generation (i.e., solar) under the LOCAL tariff.
+
+#### To display the cost of transferred energy:
+
+- When you want to display the energy cost, call the API to get it in [real-time](/api-reference/zero/costs/instantly-calculate-energy-cost), aggregated by [(charging) session](/api-reference/zero/costs/calculate-energy-cost-by-session-id) or [day/month/year](/api-reference/zero/costs/calculate-energy-cost-by-time-interval).
+
+<Tip>Consider offering tariff threshold-based (aka price cap) scheduling as a premium feature.</Tip>
+
+## Implementation
+
+<AccordionGroup>
+<Accordion icon="calendar-days" title="Creating and updating schedules">
+Once the customer's tariff is added via Connect or imported via the API, program your device to enable energy delivery when the tariff is lowest:
+<Tabs>
+<Tab title="Fixed period of low tariff">
+To create an "on/off" schedule that provides a fixed number of daily "on" hours when the tariff is low, call the [slots-time](/api-reference/zero/slots/get-slots-time) API endpoint and use the `start_time` and `end_time` values for the total period of the Response object to create a daily schedule in your device within this period.
+
+<CodeGroup>
+```json Request
+curl --request GET \
+  --url 'https://api.flatpeak.com/slots/time/loc_65e42ce4d3b813479b252160\
+  ?start_time=2024-08-01T09%3A00%3A00Z \
+  &end_time=2024-08-02T09%3A00%3A00Z \
+  &direction=IMPORT \
+  &segment=LOW \
+  &duration=300 \
+  --header 'Authorization: Bearer <token>'
+```
+```json Response
+{
+  "id": "sta_65e42cdd73e9f861edda35d7",
+  "object": "slot_time",
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "direction": "IMPORT",
+  "next_update": "2024-08-01T23:00:00Z",
+  "data": [
+    {
+      "start_time": "2024-08-01T23:00:00Z",
+      "end_time": "2024-08-02T05:30:00Z",
+      "tariff": {
+        "rate_avg": 0.08221,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+We recommend re-running the process every time an energy user (i.e. an EV) connects.
+
+</Tab>
+<Tab title="Limit price/kWh">
+
+To create a schedule to set your device to "on" when the tariff is below a specific value (for example ≤ $0.15/kWh), call [slots-threshold](/api-reference/zero/slots/get-slots-threshold) API endpoint and use `start_time` and `end_time` values of the Response object to create a schedule in your device.
+
+<CodeGroup>
+```json Request
+curl --request GET \
+  --url 'https://api.flatpeak.com/slots/threshold/loc_65e42ce4d3b813479b252160 \
+  ?start_time=2024-08-01T09%3A00%3A00Z \
+  &end_time=2024-08-02T09%3A00%3A00Z \
+  &direction=IMPORT \
+  &segment=LOW \
+  &absolute=0.1015' \
+  --header 'Authorization: Bearer <token>'
+```
+```json Response
+{
+  "id": "slt_65e42cdd73e9f861edda35d7",
+  "object": "slot_threshold",
+  "live_mode": true,
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "direction": "IMPORT",
+  "next_update": "2024-08-01T23:00:00Z",
+  "data": [
+    {
+      "start_time": "2024-08-01T23:00:00Z",
+      "end_time": "2024-08-02T05:30:00Z",
+      "tariff": {
+        "rate_avg": 0.04998,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+We recommend setting the schedule 24 hours in advance and re-running the process every time an energy user (e.g., an EV) connects.
+
+</Tab>
+</Tabs>
+</Accordion>
+<Accordion icon="meter" title="Metering energy transfers">
+When you want to calculate the cost of energy that is being transferred (or has been transferred) via your device, submit its meter reading to one of the API endpoints:
+
+<Tabs>
+<Tab title="Interval meter records">
+If your system logs meter records as intervals, call [submit-interval-meter-records](/api-reference/zero/meters/submit-interval-meter-records) API. You can use this endpoint to import historic records too.
+
+If your device is an EV charger, we recommend that you log records "tagged" by the charging session ID if you have it. Use the `session_reference_id` parameter in the request. This will make it easy to report the cost per charging session later.
+
+<Info>Make sure that you use the `units` parameter correctly: W represents the speed of transfer over the accounting period; WH represents the amount of energy transferred over that period.</Info>
+
+<CodeGroup>
+```json Request
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[
+  {
+    "location_id": "loc_641b90b758fb8e6293716e40",
+    "device_id": "dev_65e6d8334c8d715963d99db3",
+    "session_reference_id": "SESSION1234567890",
+    "direction": "IMPORT",
+    "tariff_rate": "IMPORT",
+    "units": "W",
+    "value": 8214,
+    "confidence": 1,
+    "start_time": "2024-08-01T01:00:00Z",
+    "end_time": "2024-08-01T01:30:00Z"
+  }
+]'
+```
+```json Response
+{
+  "id": "bat_65e42b7827c0526548432b9f",
+  "object": "meter_batch",
+  "records_submitted": 1,
+  "records_accepted": 1,
+  "records_processed": 1
+}
+```
+</CodeGroup>
+The API response will indicate that the submitted records have been processed successfully. You can submit up to 10,000 records at a time for a device or location.
+</Tab>
+<Tab title="Cumulative meter records">
+If your system logs meter records as cumulative values, call the [submit-cumulative-meter-records](/api-reference/zero/meters/submit-cumulative-meter-records) API. This endpoint also supports importing historical records.
+
+If your device is an EV charger, we recommend that you log records "tagged" by the charging session ID if you have it. Use the `session_reference_id` parameter in the request. This will make it easy to report the cost per charging session later.
+
+<CodeGroup>
+```json Request
+curl --request PUT \
+  --url https://api.flatpeak.com/cumulative/epoch \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "device_id": "dev_65e6d8334c8d715963d99db3",
+  "session_reference_id": "SESSION1234567890",
+  "direction": "IMPORT",
+  "tariff_rate": "IMPORT",
+  "units": "WH",
+  "data": [
+    {
+      "time": 1722471445,
+      "value": 1553
+    }
+  ]
+}'
+```
+```json Response
+{
+  "id": "bat_65e42b7827c0526548432b9f",
+  "object": "meter_batch",
+  "records_submitted": 1,
+  "records_accepted": 1,
+  "records_processed": 1
+}
+```
+</CodeGroup>
+The API response will indicate that the submitted records have been processed successfully. You can submit up to 10,000 records at a time.
+</Tab>
+</Tabs>
+<Note>If your system can distinguish between energy sourced from the grid versus from local generation, such as solar, set `"tariff_rate": "LOCAL"` when submitting the records. This will tell Flatpeak to account for this energy as "free" when calculating its cost.</Note>
+</Accordion>
+<Accordion icon="sack-dollar" title="Displaying energy cost">
+<Tabs>
+<Tab title="By session ID">
+When you want to display the cost of energy that has been transferred via your device for a charging session, and you have previously "tagged" your meter records with `session_reference_id`, use [calculate-energy-cost-by-session-id](/api-reference/zero/costs/calculate-energy-cost-by-session-id) API:
+
+<CodeGroup>
+```json Request
+curl --request POST \
+  --url 'https://api.flatpeak.com/costs/session/SESSION1234567890 \
+  ?direction=IMPORT \
+  &include_tariff=true' \
+  --header 'Authorization: Bearer <token>'
+```
+```json Response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "dev_65e6d8334c8d715963d99db3",
+  "live_mode": true,
+  "direction": "IMPORT",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "energy_units": "WH"
+  "data": [
+    {
+      "session_reference_id": "SESSION1234567890",
+      "start_time": "2024-08-01T01:00:00Z",
+      "end_time": "2024-08-01T01:30:00Z",
+      "energy": {
+        "value": 8214
+      },
+      "tariff": {
+        "value": 0.41056,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+</Tab>
+<Tab title="By day/month/year">
+When you want to display the cost of energy that has been transferred via your device aggregated by day, month or year, use [calculate-energy-cost-by-time-interval](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) API:
+
+<CodeGroup>
+```json Request
+curl --request POST \
+  --url 'https://api.flatpeak.com/costs/interval/dev_65e6d8334c8d715963d99db3 \
+  ?aggregation=MONTH \
+  &direction=IMPORT \
+  &include_tariff=true' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "start_time": "2023-08-01T00:00:00Z",
+  "end_time": "2024-08-01T23:59:59Z"
+}'
+```
+```json Response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "dev_65e6d8334c8d715963d99db3",
+  "live_mode": true,
+  "direction": "IMPORT",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "energy_units": "WH"
+  "data": [
+    {
+      "start_time": "2023-08-01T00:00:00Z",
+      "end_time": "2023-08-31T23:59:59Z",
+      "energy": {
+        "value": 120284
+      },
+      "tariff": {
+        "value": 36.45,
+        "confidence": 1
+      }
+    },
+    {
+      "start_time": "2023-09-01T00:00:00Z",
+      "end_time": "2023-09-31T23:59:59Z",
+      "energy": {
+        "value": 102284
+      },
+      "tariff": {
+        "value": 31.912,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+</Tab>
+</Tabs>
+</Accordion>
+</AccordionGroup>

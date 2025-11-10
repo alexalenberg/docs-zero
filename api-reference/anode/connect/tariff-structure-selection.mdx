@@ -1,0 +1,89 @@
+---
+title: 'Tariff structure selection'
+icon: 'list-radio'
+sidebarTitle: "6. Tariff structure"
+description: Customer selects their tariff from a Flatpeak-provided library.
+tag: "Upd"
+---
+
+If the customer hasn't logged in to their energy provider or selected a tariff from the library (e.g., if Flatpeak doesn't have it or it's missing), Connect will try to gather the tariff information by asking a series of questions, starting with the tariff structure.
+
+On this page, the customer can choose from three options:
+
+| Option         | Description                                            |
+| :-------------- | :------------------------------------------------------ |
+| `FIXED`        | Customer will be requested to input their fixed (flat) tariff rate.  |
+| `TIME_OF_DAY`  | Customer will be requested to input their variable tariff rate.      |
+| `MARKET`       | Connect will automatically detect the customer's market rate using their postal address. It will then provide the customer with an option to indicate what fees and/or surcharges they are paying to their provider on top of that rate. |
+| `ADVANCED`     | Enables you to build a custom page where your customer can input complex tariff structures — including seasonal rates, special days, consumption tiers, and more. If you plan to use this option, contact support for integration guidance. <Info>This option is only available if you set `actions.advanced_tariff_capture` to `true` when creating the `connect_token`.</Info>   |
+
+<Tabs>
+<Tab title="Preview">
+
+<Frame>
+  <img src="/images/06-configure-your-tariff.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_structure_select",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "actions": [
+    "BACK"
+  ],
+  "data": {
+    "provider": {
+      "id": "prv_65de304bba73636872c17c11",
+      "display_name": "E-ON",
+      "logo_url": "https://s.flatpeak.com/73636872c17c11.png"
+    },
+    "options": [
+      "FIXED",
+      "TIME_OF_DAY",
+      "MARKET",
+      "ADVANCED"
+    ]
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_structure_select",
+  "data": {
+    "options": [
+      "MARKET"
+    ]
+  }
+}'
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_structure_select",
+  "action": "BACK"
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code             | Error Description                                      |
+| ---------------------- | ------------------------------------------------------ |
+| `option_invalid`       | The options array can only contain one item.           |
+| `option_not_supported` | Unsupported option parameter XX.                       |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>

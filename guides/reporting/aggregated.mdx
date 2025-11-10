@@ -1,0 +1,124 @@
+---
+title: Aggregated cost reporting
+sidebarTitle: "Aggregated"
+---
+
+Flatpeak supports aggregated energy cost reporting at both Device and Location (i.e. property address) levels.
+
+Use device-based reporting if you are calculating cost for a specific device at a location — this allows you to add additional devices to the same location in the future without losing your data.
+
+
+<Steps>
+
+<Step title="Create device identifier (optional)">
+- Start by calling the [create-a-device](/api-reference/zero/devices/create-a-device) endpoint using your internal device reference.
+- Store the returned Flatpeak `device_id` permanently in your system.
+- This step only needs to be performed once per device.
+<CodeGroup>
+```json Example request
+curl --request POST \
+  --url https://api.flatpeak.com/devices \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "reference_id": "DEV1234567890"
+}'
+```
+```json Example response
+{
+  "id": "dev_63a6087272941ef077a8fd3e",
+  "object": "device",
+  "reference_id": "DEV1234567890"
+}
+```
+</CodeGroup>
+</Step>
+
+<Step title="Submit meter records">
+- Use the [submit-interval-meter-records](/api-reference/zero/meters/submit-interval-meter-records) endpoint to submit energy consumption or export meter records from your system or device.
+- If your system generates cumulative (and not interval) meter records, use [submit-cumulative-meter-records](/api-reference/zero/meters/submit-cumulative-meter-records) endpoint.
+- Optionally include the `device_id` you created earlier — this enables tagging and tracking by device.
+- The response will include confirmation of acceptance and processing status of records. You can submit up to 10,000 records at the time.
+<CodeGroup>
+``` json Example request
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[
+  {
+    "location_id": "loc_641b90b758fb8e6293716e40",
+    "device_id": "dev_65e6d8334c8d715963d99db3",
+    "record_reference_id": "MET1234567890",
+    "direction": "IMPORT",
+    "tariff_rate": "IMPORT"
+    "units": "W",
+    "value": 20567,
+    "start_time": "2022-02-01T10:30:00Z",
+    "end_time": "2022-02-01T11:00:00Z"
+  }
+]'
+```
+```json Example response
+{
+  "id": "bat_65e42b7827c0526548432b9f",
+  "object": "meter_batch",
+  "records_submitted": 1,
+  "records_accepted": 1,
+  "records_processed": 1,
+  "time_created": "2022-02-01T11:01:03Z"
+}
+```
+</CodeGroup>
+</Step>
+
+<Step title="Get energy cost report">
+- Use the [report-cost-by-interval](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) endpoint to request cost calculations for a time interval. Flatpeak will use meter records you submitted for the interval you are requesting and tariff rates to calculate the report.
+- If your use case requires reporting energy cost by non time-based event, such as EV charging session, include `session_reference_id` when submitting meter records and use [report-cost-by-session-id](/api-reference/zero/costs/calculate-energy-cost-by-session-id) to get cost report.
+
+<CodeGroup>
+``` json Example request
+curl --request POST \
+  --url https://api.flatpeak.com/costs/interval/{id} \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "start_time": "2023-11-07T05:31:56Z",
+  "end_time": "2023-12-07T05:31:56Z"
+}'
+```
+```json Example response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "dev_65e6d8334c8d715963d99db3",
+  "direction": "IMPORT",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "energy_units": "WH"
+  "data": [
+    {
+      "start_time": "2023-11-07T05:31:56Z",
+      "end_time": "2023-12-07T05:31:56Z",
+      "energy": {
+        "value": 10284
+      },
+      "tariff": {
+        "value": 6.372,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+</Step>
+
+</Steps>
+
+
+## Simulating energy cost profiles
+
+To estimate energy cost without storing the data, pass the `non_persistent=true` in your request to the [instant-cost-calculate](/api-reference/zero/costs/instantly-calculate-energy-cost) endpoint.
+
+This lets you model scenarios without affecting actual meter data or triggering downstream reporting.

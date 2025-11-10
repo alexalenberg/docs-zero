@@ -1,0 +1,41 @@
+---
+title: API Versioning
+sidebarTitle: "API Versioning"
+
+---
+
+Each major platform release may include changes that are not backward-compatible. Upgrading to a new major release can require updates to your code.
+
+Backward-compatible changes introduced outside a major release are announced in the [Changelog](changelog), but the version number will not be incremented.
+
+By default, requests use your Flatpeak account’s default API version (set in the Dashboard). You can override it by adding the `Flatpeak-Version` header:
+
+```json
+❯ curl -s --request GET \
+  --url "https://api.flatpeak.com/devices/dev_66b1ea3cbbfa0d30b978ce37" \
+  --header "Authorization: Bearer $TOKEN" \
+  --header 'Flatpeak-Version: 2025-09-14.anode'
+```
+
+Webhook events are emitted according to the API version used when the related object was created. For example:
+
+- Creating a location with `2024-08-24.zero`, will emit events in the Zero version.
+- Creating a location with `2025-09-14.anode`, will emit events in the Anode version.
+
+You can upgrade your default API version in the [Dashboard](https://dashboard.flatpeak.com/settings/versions) > **Settings** > **Versions**. As best practice, test new version by adding the header before upgrading. It is **not possible** to downgrade once you upgraded to the higher verion in Dashboard.
+
+### Errors
+
+If you are trying to pass `Flatpeak-Version` header for a version that lower than one you configured in the Dashboard (your default version) you will receive the following error
+
+```json HTTP 422 Error
+{
+  "object": "error",
+  "live_mode": true,
+  "context": "api",
+  "type": "invalid_request",
+  "code": "api_version_not_supported",
+  "message": "Requested API version 2024-08-24 older than account default 2025-08-01.anode",
+  "time_created": "2025-08-24T14:15:22.003"
+}
+```

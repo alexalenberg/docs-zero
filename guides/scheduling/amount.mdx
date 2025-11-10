@@ -1,0 +1,36 @@
+---
+title: Schedule by amount of energy
+sidebarTitle: "By amount of energy"
+---
+
+Know the amount of energy your device needs to import or export, call the [scheduling-amount](/api-reference/zero/schedules/create-a-schedule) API endpoint.
+
+Flatpeak will use the Location tariff and, if present, data on [local generation](/guides/reporting/local-generation) to find the best time slots for you to consume or export energy.
+
+<Info>This endpoint is designed for both simple and very complex multi-device use cases - please contact [support](https://flatpeak.com/support) if you need assistance with the design of your implementation.</Info>
+
+```json5 Example Request
+curl --request POST \
+  --url https://api.flatpeak.com/schedules \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "data": [
+    {
+      "device_id": "dev_65e6d8334c8d715963d99db3",
+      "direction": "IMPORT",
+      "start_time": "2022-02-01T20:14:00Z",
+      "end_time": "2022-02-02T06:00:00Z",
+      "max_power": {
+        "units": "W",
+        "value": 7000
+      },
+      "energy": {
+        "units": "WH",
+        "value": 24500
+      }
+    }
+  ]
+}'
+```

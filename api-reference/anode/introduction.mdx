@@ -1,0 +1,31 @@
+---
+title: API Reference
+sidebarTitle: "Introduction"
+---
+
+<Note>[2025-09-14.anode release notes](/api-reference/anode/release-notes)</Note>
+
+The Flatpeak API is RESTful and resource-driven, using:
+- Standard HTTP methods (GET, POST, etc.)
+- JSON for writes and reads
+- [Bearer token authentication](/guides/system/authorization)
+- [Sandbox mode](/guides/system/test-mode) (test API keys start with `sk_test_`; live keys with `sk_live_`)
+- Consistent status codes across operations
+
+## Connect endpoints
+
+The Connect API operates differently:
+
+|Feature | Details |
+| :-| :- |
+| **Endpoint** | Single endpoint, used like a JSON‑structured conversation |
+| **Session ID** | A one-time-use `connect_token` authorises each session |
+| **Flow Control** | Your app must handle every step of Connect session |
+| **Usage** | Follow the [Connect guide](/guides/connect/api) to implement this flow |
+
+## Developer tips
+
+1. Use REST best practices for non-Connect endpoints
+2. Ensure Authorization keys match environment (`sk_test_` vs `sk_live_`)
+3. For Connect, follow session flow and handle all required pages
+4. Test in sandbox mode before going live

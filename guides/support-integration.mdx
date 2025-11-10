@@ -1,0 +1,34 @@
+---
+title: Integrating Flatpeak with your internal support tools
+sidebarTitle: "Support integration"
+tag: "New"
+---
+
+When implementing Flatpeak you will need to provide your support team with tools to quickly assess the status of customer's tariff connection and assist with making changes.
+
+This guide shows how to use Flatpeak’s tools to add visibility and control of tariff connections directly into your Support Dashboard.
+
+
+## Reuse the Tariff settings page from your app
+
+The fastest way to see what your customer sees and if required modify it, integrate Flatpeak into your support tools by building a version of the Tariff settings page inside your Support Dashboard:
+
+<Frame>
+<img
+  src="/images/tariff-settings-page--admin.png"
+/>
+</Frame>
+
+[Tariff settings page](/guides/connect/settings-page) guide.
+
+## Implementation plan
+
+<Note>Flatpeak stores tariffs at the Location level (with each Location linked to a Customer), not on the Customer object itself. This means your support tools should handle a one-to-many relationship between customers and locations—unless you only support a single location per customer in your core service.</Note>
+
+The following plan assumes you support multiple locations per customer:
+
+| Step | Action                                                                 |
+|:-----|:------------------------------------------------------------------------|
+| 1    | For each customer account, check if any Location has a Flatpeak Location ID. |
+| 2    | For each Location with a Flatpeak Location ID, implement a status snippet similar to the illustration above. Refer to Tariff settings > [View or update](/guides/connect/settings-page#view-or-update) for details. |
+| 3    | Allow your support team to use the view the tariff status and launch Connect on behalf of the customer and manage their tariff. |

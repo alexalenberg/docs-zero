@@ -1,0 +1,80 @@
+---
+title: Flatpeak tariff lifecycle (via webhooks)
+sidebarTitle: "3. Lifecycle webhooks"
+---
+
+After a customer completes the Connect flow, Flatpeak continually synchronises their tariff data. If any action is needed, Flatpeak sends [events](/guides/system/events) via [webhooks](/guides/system/webhooks) to your backend so you can notify customers and prompt corrective steps.
+
+## Event types you must handle
+
+Subscribe to and process these three webhook events:
+
+| Event                 | Description                                                                                                        |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| `tariff.expiring`     | Triggered when tariff is nearing its end, usually 7–10 days before expiration.                                     |
+| `tariff.expired`      | Triggered when the tariff term has expired.                                                                        |
+| `tariff.fetch.failed` | Triggered after a series of failed attempts to sync tariff data from the provider (e.g., due to broken credentials)|
+
+To subscribe to these events, go to Dashboard [Webhooks](https://dashboard.flatpeak.com/webhooks) page.
+
+
+## Recommended handling flow
+
+When your backend receives any of the above events:
+
+1.	Capture the webhook payload — your server should parse the event and extract relevant IDs, including `location_id`.  ￼
+2.	Notify the customer — send a notification (e.g., in-app or email), referencing the `location_id` from the event, resolved to the postal address.
+3.	Prompt action — link notification to [Tariff Settings Page](/guides/connect/settings-page) in your app to review and resolve issues.
+
+## Example webhook payload
+
+<CodeGroup>
+```json Tariff expiring
+{
+  "id": "evt_66167787c1652b3fbeba5f01",
+  "object": "event",
+  "type": "tariff.expiring",
+  "data": {
+    "tariff_id": "trf_6597ef46529ab4467502af0b",
+    "location_id": "loc_661677cdc31d91695fd8f33d",
+    "customer_id": "cus_65e421d1daa4a24082b4f590"
+  },
+  "time_created": "2024-02-01T11:25:39Z"
+}
+```
+```json Tariff expired
+{
+  "id": "evt_66167787c1652b3fbeba5f01",
+  "object": "event",
+  "type": "tariff.expired"
+  "data": {
+    "tariff_id": "trf_6597ef46529ab4467502af0b",
+    "location_id": "loc_661677cdc31d91695fd8f33d",
+    "customer_id": "cus_65e421d1daa4a24082b4f590"
+  },
+  "time_created": "2024-02-01T11:25:39Z"
+}
+```
+```json Tariff fetch failed event example
+{
+  "id": "evt_66167787c1652b3fbeba5f01",
+  "object": "event",
+  "type": "tariff.fetch.failed"
+  "data": {
+    "tariff_id": "trf_6597ef46529ab4467502af0b",
+    "location_id": "loc_661677cdc31d91695fd8f33d",
+    "customer_id": "cus_65e421d1daa4a24082b4f590"
+  },
+  "time_created": "2024-02-01T11:25:39Z"
+}
+```
+</CodeGroup>
+
+## Summary workflow
+
+| Step | Action                                                                 |
+|:------|:------------------------------------------------------------------------|
+| 1    | Flatpeak sends a webhook event (`tariff.expiring`, `tariff.expired`, or `tariff.fetch.failed`) |
+| 2    | Your backend receives and parses the event payload                     |
+| 3    | You notify the customer and link them to the Tariff Settings Page     |
+| 4    | The customer opens the flow and reconnects or updates their tariff     |

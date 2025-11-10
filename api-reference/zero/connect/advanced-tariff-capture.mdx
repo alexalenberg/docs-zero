@@ -1,0 +1,125 @@
+---
+title: 'Advanced tariff capture (input)'
+icon: 'starfighter-twin-ion-engine-advanced'
+sidebarTitle: "Advanced tariff input"
+description: Provides advanced tariff configuration options.
+---
+
+Returned when the `ADVANCED` option is selected on the [Tariff structure selection](/api-reference/zero/connect/tariff-structure-selection) page. 
+
+Use this to build a custom interface where your customers can define complex tariffs — including TOU schedules (e.g. weekends, seasons, special days), consumption tiers and market-based pricing. 
+
+The structure and validation rules follow the [create-a-tariff](/api-reference/zero/tariffs/create-a-tariff-element) API endpoint. Contact support for guidance before implementing.
+
+<Tabs>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_advanced_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+    "currency_code": "GBP",
+    "provider": {
+      "id": "prv_65de3167136dda41ceba3c2f",
+      "display_name": "EDF",
+      "logo_url": "https://s.flatpeak.com/dda41ceba3c2f.png"
+    },
+    "tariff": {
+      "market_rates": false,
+      "contract_start_date": "2023-01-24T00:00:00Z",
+      "contract_end_date": "2024-01-24T00:00:00Z",
+      "schedule": [
+        {
+          "months": [
+            "All"
+          ],
+          "dates": [
+            24,25,26
+          ],
+          "days_and_hours": [
+            {
+              "days": [
+                "All"
+              ],
+              "hours": [
+                {
+                  "valid_from": "05:00:00",
+                  "valid_to": "23:30:00",
+                  "rate": [
+                    {
+                      "fixed": 0.23431,
+                      "to_kwh": 30.5,
+                      "surcharge_fixed": 0.12,
+                      "surcharge_percentage": 0.05
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_advanced_capture",
+  "data": {
+    "tariff": {
+      "market_rates": false,
+      "contract_start_date": "2023-01-24T00:00:00Z",
+      "contract_end_date": "2024-01-24T00:00:00Z",
+      "schedule": [
+        {
+          "months": [
+            "All"
+          ],
+          "dates": [
+            "24,25,26"
+          ],
+          "days_and_hours": [
+            {
+              "days": [
+                "All"
+              ],
+              "hours": [
+                {
+                  "valid_from": "05:00:00",
+                  "valid_to": "23:30:00",
+                  "rate": [
+                    {
+                      "fixed": 0.23431,
+                      "to_kwh": 30.5,
+                      "surcharge_fixed": 0.12,
+                      "surcharge_percentage": 0.05
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                      | Error Description           |
+| :------------------------------ | :-------------------------- |
+| `data_json_invalid`| Data does not conform to the JSON schema.|
+
+</Tab>
+</Tabs>

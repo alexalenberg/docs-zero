@@ -1,0 +1,76 @@
+---
+title: "Postal address"
+icon: "map-location"
+sidebarTitle: "2. Postal address"
+description: Customer enters their address
+---
+
+This step collects the customer’s physical address when connecting their energy tariff. It’s required unless you’ve already provided `postal_address.country_code` and `postal_address.city` when creating the `connect_token`.
+
+### Developer notes
+
+- **Skip this step if possible**: Include postal address information in [create-connect-token](/api-reference/zero/connect/create-a-connect-token) request to streamline the flow.
+- **Purpose**: The postal address defines the location context for tariff discovery and connection.
+- **Impact**: If you do not pre-populate the address, the Connect API will prompt the customer to enter it during the flow.
+
+<Tabs>
+  <Tab title="Preview">
+  <Frame>
+   <img src="/images/01-add-address.png" style={{ width: "200px" }} />
+  </Frame>
+ </Tab>
+ <Tab title="Code">
+  <Info>Consider adding an address lookup service such as [Google Place Autocomplete](https://developers.google.com/maps/documentation/javascript/place-autocomplete) for a better customer experience and to avoid server-side errors when the customer types an invalid address.</Info>
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "postal_address_capture",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "data": {
+    "postal_address": {
+      "address_line1": "",
+      "address_line2": "",
+      "city": "",
+      "state": "",
+      "post_code": "",
+      "country_code": ""
+    }
+  }
+}
+```
+```json Your POST to Connect (data)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "postal_address_capture",
+  "data": {
+    "postal_address": {
+      "address_line1": "1-3",
+      "address_line2": "Strand",
+      "city": "London",
+      "state": "Greater London",
+      "post_code": "WC2N 5EH",
+      "country_code": "GB"
+    }
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code              | Error Description                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `city_missing`          | City name is required.                                                                                            |
+| `country_code_missing`  | Country code is required.                                                                                         |
+| `country_code_invalid`  | Country code must be in two-letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format. |
+| `timezone_not_found`    | Unable to detect location timezone, provide at least country_code and city.                                       |
+| `data_json_invalid`     | Data does not conform to the JSON schema.                                                                         |
+
+  </Tab>
+</Tabs>

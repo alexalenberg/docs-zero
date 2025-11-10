@@ -1,0 +1,34 @@
+---
+title: Objects deletion
+sidebarTitle: "Objects deletion"
+---
+
+The Flatpeak supports deletion for several object types.
+
+When an object is deleted, related objects may also be removed—or their references unlinked.
+This page outlines how deletion behaves across different object types and relationships.
+## Customer
+
+When a [customer is deleted](/api-reference/zero/customers/delete-a-customer):
+
+- All Locations belonging to this Customer are also deleted.
+
+## Location
+
+When a [location is deleted](/api-reference/zero/locations/delete-a-location):
+
+- The Customer it belongs to is updated to remove the deleted Location.
+- All Tariffs associated with this Location are deleted.
+
+## Tariff
+
+When a [tariff (element) is deleted](/api-reference/zero/tariffs/delete-a-tariff-element):
+
+- The Location object it was associated with is updated.
+- All related Connect information is deleted, including energy provider connection data (keys, credentials, etc).
+
+## Device
+
+When a [device is deleted](/api-reference/zero/devices/delete-a-device):
+
+- No other objects are updated.

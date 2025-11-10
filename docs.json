@@ -1,0 +1,404 @@
+{
+	"$schema": "https://mintlify.com/docs.json",
+	"theme": "mint",
+	"name": "Flatpeak",
+        "banner": {
+        "content": "⚠️ You are viewing documentation for our legacy release **Zero**. If you are exploring or integrating Flatpeak today, start with the [**Anode** release](https://docs.flatpeak.com).",
+        "dismissible": false 
+    },
+    "seo": {
+        "metatags": {
+        "robots": "noindex"
+        }
+    },
+	"styling": {
+		"eyebrows": "section",
+		"codeblocks": "system"
+	},
+	"fonts": {
+		"heading": {
+			"family": "NB International Pro",
+			"format": "woff2",
+			"source": "https://flatpeak-static.s3.amazonaws.com/misc/fonts/nbinternationalpro-bold-webfont.woff2"
+		},
+		"body": {
+			"family": "NB International Pro",
+			"format": "woff2",
+			"source": "https://flatpeak-static.s3.amazonaws.com/misc/fonts/nbinternationalpro-regular-webfont.woff2"
+		}
+	},
+	"colors": {
+		"primary": "#49B4BD",
+		"light": "#BEF5F3",
+		"dark": "#2C5C6C"
+	},
+	"favicon": "/favicon.png",
+	"navigation": {
+		"dropdowns": [
+			{
+				"dropdown": "Getting Started",
+				"icon": "rocket-launch",
+				"groups": [
+					{
+						"group": "Introduction",
+						"pages": [
+							"index", 
+							"quickstart", 
+							"plan", 
+							"faq"
+						]
+					},
+					{
+						"group": "Connecting customer tariff",
+						"pages": [
+							"guides/connect/webview",
+							"guides/connect/api",
+							"guides/connect/settings-page",
+							"guides/connect/lifecycle",
+							"guides/connect/branding"
+						]
+					},
+					{
+						"group": "Scheduling energy",
+						"pages": [
+							"guides/scheduling/index",
+							"guides/scheduling/duration",
+							"guides/scheduling/limit",
+							"guides/scheduling/amount"
+						]
+					},
+					{
+						"group": "Reporting cost",
+						"pages": [
+							"guides/reporting/index",
+							"guides/reporting/instant",
+							"guides/reporting/aggregated",
+							"guides/reporting/tariff-rates",
+							"guides/reporting/local-generation"
+						]
+					}
+				]
+			},
+			{
+				"dropdown": "In-Depth Guides",
+				"icon": "book-open",
+				"groups": [
+					{
+						"group": "Use Cases",
+						"pages": [
+							"/cases/index",
+							"/cases/cold-storage",
+							"/cases/ev",
+							"/cases/switched-system",
+							"/cases/hvac",
+							"/cases/generation-system",
+							"/cases/storage-system"
+						]
+					},
+					{
+						"group": "Migration",
+						"pages": [
+							"guides/support-integration",
+              				"guides/bulk-assignment",
+							"guides/importing-your-data",
+							"guides/exporting-your-data"
+						]
+					},
+					{
+						"group": "Branded plans",
+						"pages": [
+							"guides/branded-plans/overview",
+							"guides/branded-plans/nomos",
+							"guides/branded-plans/integration-guide"
+						]
+					}
+				]
+			},
+						{
+				"dropdown": "Knowledgebase",
+				"icon": "lightbulb-on",
+				"groups": [
+					{
+						"group": "Core API methods",
+						"pages": [
+							"guides/system/authorization",
+							"guides/system/errors",
+							"guides/system/events",
+							"guides/system/pagination",
+							"guides/system/webhooks",
+							"guides/devices"
+						]
+					},
+					{
+						"group": "Platform overview",
+						"pages": [
+							"guides/system/structure",
+							"guides/connect/flow-architecture",
+							"guides/system/test-mode",
+							"guides/system/versioning",
+							"guides/system/timezones",
+							"guides/system/deletion"
+						]
+					},
+					{
+						"group": "Data sources",
+						"pages": [
+							"guides/carbon-intensity",
+							"guides/grid-fees",
+							"guides/market-rates",
+							"guides/providers",
+							"guides/tariff-forecasts",
+							"openenergy"
+						]
+					}
+				]
+			},
+			{
+				"dropdown": "API Reference",
+				"icon": "square-terminal",
+						"groups": [
+							{
+								"group": " ",
+								"pages": [
+									"api-reference/zero/introduction",
+									{
+										"group": "Authorization",
+										"pages": ["api-reference/zero/login/create-a-bearer-token"]
+									},
+									{
+										"group": "Events",
+										"pages": [
+											"api-reference/zero/events/list-all-events",
+											"api-reference/zero/events/retrieve-an-event"
+										]
+									},
+									{
+										"group": "Customers",
+										"pages": [
+											"api-reference/zero/customers/list-all-customers",
+											"api-reference/zero/customers/retrieve-a-customer",
+											"api-reference/zero/customers/create-a-customer",
+											"api-reference/zero/customers/update-a-customer",
+											"api-reference/zero/customers/delete-a-customer"
+										]
+									},
+									{
+										"group": "Locations",
+										"pages": [
+											"api-reference/zero/locations/list-locations",
+											"api-reference/zero/locations/retrieve-a-location",
+											"api-reference/zero/locations/retrieve-a-location-status",
+											"api-reference/zero/locations/create-a-location",
+											"api-reference/zero/locations/update-a-location",
+											"api-reference/zero/locations/delete-a-location"
+										]
+									},
+									{
+										"group": "Tariff (elements)",
+										"pages": [
+											"api-reference/zero/tariffs/list-tariff-elements",
+											"api-reference/zero/tariffs/create-a-tariff-element",
+											"api-reference/zero/tariffs/retrieve-a-tariff-element",
+											"api-reference/zero/tariffs/delete-a-tariff-element"
+										]
+									},
+									{
+										"group": "Devices",
+										"pages": [
+											"api-reference/zero/devices/list-all-devices",
+											"api-reference/zero/devices/retrieve-a-device",
+											"api-reference/zero/devices/create-a-device",
+											"api-reference/zero/devices/update-a-device",
+											"api-reference/zero/devices/delete-a-device"
+										]
+									}
+								]
+							},
+							{
+								"group": "Connect",
+								"pages": [
+									{
+										"group": "Session management",
+										"pages": [
+											"api-reference/zero/connect/create-a-connect-token",
+											"api-reference/zero/connect/start-a-connect-session",
+											"api-reference/zero/connect/complete-a-connect-session",
+											"api-reference/zero/connect/exchange-a-connect-token"
+										]
+									},
+									{
+										"group": "Required pages",
+										"pages": [
+											"api-reference/zero/connect/postal-address",
+											"api-reference/zero/connect/provider-selection",
+											"api-reference/zero/connect/provider-login",
+											"api-reference/zero/connect/library-selection",
+											"api-reference/zero/connect/tariff-structure-selection",
+											"api-reference/zero/connect/manual-tariff-capture",
+											"api-reference/zero/connect/market-surcharge-capture",
+											"api-reference/zero/connect/tariff-name-capture",
+											"api-reference/zero/connect/contract-term-capture",
+											"api-reference/zero/connect/tariff-connection-progress",
+											"api-reference/zero/connect/tariff-connection-failed",
+											"api-reference/zero/connect/tariff-summary",
+											"api-reference/zero/connect/server-error"
+										]
+									},
+									{
+										"group": "Optional pages",
+										"pages": [
+											"api-reference/zero/connect/advanced-tariff-capture"
+										]
+									}
+								]
+							},
+							{
+								"group": "Scheduling",
+								"pages": [
+									"api-reference/zero/slots/get-slots-time",
+									"api-reference/zero/slots/get-slots-threshold",
+									"api-reference/zero/schedules/create-a-schedule"
+								]
+							},
+							{
+								"group": "Cost Reporting",
+								"pages": [
+										"api-reference/zero/costs/instantly-calculate-energy-cost",
+										"api-reference/zero/costs/calculate-energy-cost-by-time-interval",
+										"api-reference/zero/costs/calculate-energy-cost-by-session-id",
+									{
+										"group": "Submit meter records",
+										"pages": [
+											"api-reference/zero/meters/submit-interval-meter-records",
+											"api-reference/zero/meters/submit-cumulative-meter-records",
+											"api-reference/zero/meters/check-submission-batch-status"
+										]
+									},
+									{
+										"group": "Raw tariff rates",
+										"pages": [
+											"api-reference/zero/tariffs/get-tariff-rates",
+											"api-reference/zero/tariffs/audit-tariff-rates"
+										]
+									}
+								]
+							}
+						]
+			},
+			{
+				"dropdown": "Terms of Service",
+				"icon": "file-signature",
+				"groups": [
+					{
+						"group": "Contract",
+						"pages": ["legal/terms"]
+					},
+					{
+						"group": "Support",
+						"pages": ["legal/service-level-agreement", "legal/support-policy"]
+					},
+					{
+						"group": "Data safety",
+						"pages": [
+							"legal/data-processing-agreement",
+							"legal/privacy",
+							"legal/subprocessors"
+						]
+					},
+					{
+						"group": "Compliance",
+						"pages": ["legal/disclosure-request", "legal/acceptable-use-policy"]
+					},
+					{
+						"group": "Updates",
+						"pages": ["legal/archives/terms-update-notices"]
+					}
+				]
+			},
+			{
+				"dropdown": "Changelog",
+				"icon": "clock-rotate-left",
+				"groups": [
+					{
+						"group": "Changelog",
+						"pages": ["changelog"]
+					}
+				]
+			}
+		]
+	},
+	"logo": {
+		"light": "/images/flatpeak-logo-new-dark.png",
+		"dark": "/images/flatpeak-logo-new-light.png"
+	},
+	"navbar": {
+		"links": [
+			{
+				"label": "Support",
+				"href": "https://flatpeak.com/support"
+			}
+		],
+		"primary": {
+			"type": "button",
+			"label": "Dashboard",
+			"href": "https://dashboard.flatpeak.com"
+		}
+	},
+	"footer": {
+		"socials": {
+			"github": "https://github.com/flat-peak/",
+			"linkedin": "https://www.linkedin.com/company/flatpeak"
+		}
+	},
+	"integrations": {
+		"ga4": {
+			"measurementId": "G-2ZGZW08N65"
+		}
+	},
+	"redirects": [
+		{
+			"source": "/providers",
+			"destination": "/guides/branded-plans/integraiton-guide"
+		},
+		{
+			"source": "/routing",
+			"destination": "/faq#how-connect-selects-the-best-tariff-link-method"
+		},
+		{
+			"source": "/commercials/legal/service-level-agreement",
+			"destination": "/legal/service-level-agreement"
+		},
+		{
+			"source": "/commercials/legal/support-policy",
+			"destination": "/legal/support-policy"
+		},
+		{
+			"source": "/commercials/legal/data-processing-agreement",
+			"destination": "/legal/data-processing-agreement"
+		},
+		{
+			"source": "/commercials/legal/privacy",
+			"destination": "/legal/privacy"
+		},
+		{
+			"source": "/commercials/legal/subprocessors",
+			"destination": "/legal/subprocessors"
+		},
+		{
+			"source": "/commercials/legal/disclosure-request",
+			"destination": "/legal/disclosure-request"
+		},
+		{
+			"source": "/commercials/legal/acceptable-use-policy",
+			"destination": "/legal/acceptable-use-policy"
+		},
+		{
+			"source": "/commercials/legal/archives/terms-update-notices",
+			"destination": "/legal/archives/terms-update-notices"
+		},
+		{
+			"source": "/run-the-app",
+			"destination": "/quickstart"
+		}
+	]
+}

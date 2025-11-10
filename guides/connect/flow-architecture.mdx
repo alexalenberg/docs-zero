@@ -1,0 +1,158 @@
+---
+title: Connect flow architecture
+sidebarTitle: "Connect flow"
+mode: "wide"
+---
+
+When a customer uses Connect, we start with the fastest, most accurate method. If it fails—say they skip login—we instantly fall back to the next best option. No dead ends. No manual steps unless absolutely necessary.
+
+Connect prioritises tariff connection methods in this order:
+	1.	`DIRECT` – Instant, authenticated connection
+	2.	`LIBRARY` – Selection for Flatpeak-maintained library
+	3.	`MARKET` – Automatically links market-based tariff by geo-location
+	4.	`MANUAL` – Customer input as a last resort
+
+  The diagram below shows how sessions flow across these connection types:
+
+<Tabs>
+<Tab title="Simplified flow diagram">
+```mermaid
+flowchart LR
+    A(["Start"]) -- Only if address<br>incomplete --> B["Postal<br>Address<br>"]
+    B --> S("Provider<br>Selection")
+    A --> S
+    S --> D("Direct<br>Login<br>(Auth)")
+    D -- "<font color=green>Yes</font>" --> TSUM(["Tariff<br>Connected"])
+    D -- No --> L("Tariff<br>Library")
+    L -- "<font color=green>Yes</font>" --> TSUM
+    L -- No --> MK["Market<br>mapping"]
+    MK -- "<font color=green>Yes</font>" --> TSUM
+    MK -- No --> MU["Manual<br>input"]
+    MU -- "<font color=green>Yes</font>" --> TSUM
+
+    B@{ shape: manual-input}
+    MK@{ shape: subproc}
+    MU@{ shape: manual-input}
+     B:::userAction
+     S:::userAction
+     D:::userAction
+     L:::userAction
+     MK:::userAction
+     MU:::userAction
+    classDef userAction fill:#cce5ff,stroke:#004085,color:#004085
+    style B stroke-dasharray: 5 5,stroke:#555,color:#333
+    style D fill:#00C853,color:#FFFFFF
+    ```
+</Tab>
+<Tab title="Detailed flow diagram">
+```mermaid
+---
+config:
+  layout: auto
+---
+flowchart LR
+    n1{"Address OK?"}
+    n1 -- Yes --> S@{ shape: manual-input, label: "Select provider" }
+    n1 -- No --> B@{ shape: doc, label: "Input address" } --> S
+    S --> D1{"Direct?"}
+    D1 -- Yes --> DF@{ shape: event, label: "Direct Auth \n (redirect, auth, return)" } --> n4@{ shape: diam, label: "Direct OK?" }
+    n4 -- Yes --> TSUM@{ shape: cross-circ, label: "Tariff Summary" }
+    n4 -- No --> D2
+    D1 -- No --> D2{"Library?"}
+    D2 -- Yes --> L@{ shape: manual-input, label: "Select tariff" }
+    L -- Success --> TSUM
+    L -- Not found --> D3
+    D2 -- No --> D3{"Market?"}
+    D3 -- Yes --> MK@{ shape: doc, label: "Surcharge" } --> TSUM
+    D3 -- No --> MU@{ shape: doc, label: "Manual input" } --> TSUM
+
+    %% Node styles
+    style DF fill:#00C853,color:#fff
+    style S fill:#cce5ff,stroke:#004085
+    style B fill:#cce5ff,stroke:#004085
+    style L fill:#cce5ff,stroke:#004085
+    style MK fill:#cce5ff,stroke:#004085
+    style MU fill:#cce5ff,stroke:#004085
+    style TSUM fill:#e2e3e5,stroke:#343a40,stroke-width:2px
+
+```
+</Tab>
+</Tabs>
+
+## Connect flow modules
+
+Flatpeak’s Connect flow is split into **two modules**:
+
+### 1. Main module
+
+This handles:
+
+- [Postal address input](/api-reference/zero/connect/postal-address).
+- [Provider selection](/api-reference/zero/connect/provider-selection).
+- Market tariff connection (automatic).
+- [Library tariffs](/api-reference/zero/connect/library-selection).
+- [Market surcharges](/api-reference/zero/connect/market-surcharge-capture).
+- [Manual tariff input](/api-reference/zero/connect/manual-tariff-capture).
+- [Tariff summary display (and edit)](/api-reference/zero/connect/tariff-summary).
+
+This part can be fully customised by either [forking our reference implementation](/guides/connect/webview) or implemented natively in your app by integrating the Connect API.
+
+### 2. Auth module
+
+The user is redirected to this module when they select a provider that has a direct integration with Flatpeak. Highlighted *green* in the diagram above provides:
+
+- [Redirect to energy provider auth page](/api-reference/zero/connect/provider-login) (typically in the web)
+- Secure login at the provider page.
+- Return to the Main module.
+
+This part is not customisable as it is often hosted by the provider (depending on the integration arrangement with Flatpeak). It must be displayed in a **WebView**.
+
+<Frame caption="Provider login page example">
+   <img src="/images/Direct Login.png" style={{ width: "200px" }}/>
+</Frame>
+
+## Working with URI parameters in Connect token create
+
+When [creating a connect token](api-reference/zero/connect/create-a-connect-token) you need to specify `connect_web_uri` and `callback_uri`:
+
+- The `connect_web_uri` is used **mid-session** to redirect user from Auth module (WebView) back into the Main module (your app).
+
+- The `callback_uri` is used at the **very end** of the entire flow once the customer completes the [tariff summary page](/api-reference/zero/connect/tariff-summary) and taps **“Save”**, their browsing session is redirected to callback_uri so you can return it to your app or platform.
+
+Use the following parameter combination when calling [create a connect token](/api-reference/zero/connect/create-a-connect-token) endpoint:
+
+#### Option 1. Testing while self-hosting our Web-based [reference implementation](/guides/connect/webview)
+
+```json
+{
+  "connect_web_uri": "https://connect.yourapp.com",
+  "callback_uri": "https://yourapp.com/flatpeak/callback"
+}
+```
+
+#### Option 2. Your native app using Web-based Connect
+
+Still relying on web Connect (e.g. hosted or forked UI), but want the rest of the experience native:
+
+```json
+{
+  "connect_web_uri": "https://connect.yourapp.com",
+  "callback_uri": "yourapp://flatpeak/callback"
+}
+```
+
+#### Option 3. Fully Native App (Recommended)
+
+You’ve implemented Connect UI natively:
+
+```json
+{
+  "connect_web_uri": "yourapp://tariff/connect",
+  "callback_uri": "yourapp://tariff/callback"
+}
+```
+
+In this case:
+
+- DIRECT flow redirects back into the app to `connect_web_uri` after login.
+- After the customer hits “Save” in your native implementation of [tariff summary page](/api-reference/zero/connect/tariff-summary), you can optionally use `callback_uri` for final navigation—or ignore it entirely.

@@ -1,0 +1,23 @@
+---
+title: Overview of cost reporting APIs
+sidebarTitle: Overview
+---
+
+Flatpeak energy cost reporing APIs enable you to calculate energy cost in real-time, or report it aggregated by session, day, week, month or a year. All reporting endpoints support both **device** and **locaiton** (i.e. property address) levels and can take into account [local (i.e. solar)](/guides/reporting/local-generation) generaion.
+
+You can also sync our raw tariff rates and make all calculations in your systems.
+
+
+Select from three approaches:
+
+<CardGroup cols={1}>
+  <Card title="Instant reporting" horizontal icon="bolt" href="/guides/reporting/instant">
+    Ingests a meter record and instantly returns energy cost.
+  </Card>
+  <Card title="Aggregated reporting" horizontal icon="layer-group" href="/guides/reporting/aggregated">
+    Uses previously submitted meter recors to report by session tags or day/week/month.
+  </Card>
+  <Card title="Raw tariff rates" horizontal icon="chart-mixed" href="/guides/reporting/tariff-rates">
+    Returns raw tariff rates in time series format.
+  </Card>
+</CardGroup>

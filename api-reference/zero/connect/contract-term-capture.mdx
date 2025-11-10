@@ -1,0 +1,67 @@
+---
+title: 'Contract term capture (input)'
+icon: 'calendar-star'
+sidebarTitle: "9. Contract term"
+description: Customer enters the date when their contract starts and/or expires.
+---
+
+This page is returned when Connect cannot automatically detect the term of your customer's contract. You can extend this page's functionality by including `contract_start_date` and `contract_end_date`.
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/10-contract-expiry-date.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<Note>
+
+The `contract_end_date` and `contract_start_date` format:
+
+- If date is provided, return it in RFC3339 (i.e. UTC) `2024-06-15T00:00:00Z`
+- If contract has no end date, return `0001-01-01T00:00:00Z`
+- If no information is available, return `null`
+</Note>
+
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "contract_term_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+    "provider": {
+      "id": "prv_65de3071e0c5570f767f06f1",
+      "display_name": "SSE",
+      "logo_url": "https://s.flatpeak.com/570f767f06f1.png"
+    },
+    "contract_start_date": null,
+    "contract_end_date": null
+  }
+}
+```
+```json Your POST to connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "contract_term_capture",
+  "data": {
+    "contract_start_date": "2023-06-15T00:00:00Z",
+    "contract_end_date": "2024-06-15T00:00:00Z"
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code              | Error Description                      |
+| ----------------------- | -------------------------------------- |
+| `date_format_invalid`   | Incorrect date format.                 |
+| `data_json_invalid`     | Data does not conform to the JSON schema.  |
+
+</Tab>
+</Tabs>

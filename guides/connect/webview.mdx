@@ -1,0 +1,130 @@
+---
+title: Integrating Flatpeak Connect in your app via WebView
+sidebarTitle: "1a. Connect WebView"
+mode: "wide"
+---
+
+Use this guide to quickly embed Flatpeak’s Connect flow in your app using a web view.
+
+<Steps>
+<Step title="Get Connect's web app">
+```bash
+git clone https://github.com/flat-peak/flatpeak-connect-web.git
+cd flatpeak-connect-web
+npm install
+```
+This step downloads Flatpeak’s open-source Connect Web reference app within your project.
+
+</Step>
+<Step title="Configure Environment Variables">
+```bash
+export FLATPEAK_CONNECT_URL=https://connect.flatpeak.com
+```
+Ensure this is set correctly for your environment. Adjust for Windows-based shells if needed.
+
+</Step>
+<Step title="Launch Locally">
+
+```bash
+npm run dev
+```
+
+  <Frame>
+    <img src="/images/connect-web-local-clean.png" />
+  </Frame>
+
+  This launches the WebApp on [http://localhost:7070](http://localhost:7070)`. You will see an error. This is because you have not provided a Connect token. Ignore this and continue following this guide.
+
+</Step>
+<Step title="Generate a Connect Token">
+
+  1. First, get a Bearer token via the [create-a-bearer-token](/api-reference/zero/login/create-a-bearer-token) endpoint.
+  2. Next, call the [create-connect-token](/api-reference/zero/connect/create-a-connect-token) endpoint to get a temporary `connect_token`.
+
+    <CodeGroup>
+    ```json Example Request
+    curl --request POST \
+    --url https://api.flatpeak.com/connect/tariff/token \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "connect_web_uri": "<URL where you are running the Connect WebApp>",
+      "callback_uri": "<URI to redirect after Connect completes>",
+      "postal_address": {
+        "address_line1": "1-3",
+        "address_line2": "Strand",
+        "city": "London",
+        "state": "Greater London",
+        "post_code": "WC2N 5EH",
+        "country_code": "GB"
+      }
+    }'
+    ```
+    ```json Example Response
+    {
+      "connect_token": "cot_6587fa4362341be5b524de3b",
+      "expires_in": "86400"
+    }
+    ```
+    </CodeGroup>
+
+    The `connect_token` grants temporary access to the Connect API, eliminating the need to expose your API key in frontend code.
+
+</Step>
+<Step title="Open the WebView with Token">
+
+  In your browser, open: `http://localhost:7070?fp_cot=cot_***`, replacing `cot_***` with the `connect_token`:
+
+    <Frame>
+      <img src="/images/connect-local-uri-build.png" />
+    </Frame>
+
+</Step>
+<Step title="Customer interacts with Connect flow">
+
+  Connect will present a series of pages that discovers electreicty tariff at the address you have provided when generated the Connect Token. It automatically selects the [best tariff link method](faq#how-connect-selects-the-best-tariff-link-method) based on available provider APIs, local data regulations, and usage patterns across the Flatpeak network.
+
+  <Frame>
+    <img
+      src="/images/connect-overview.png"
+    />
+  </Frame>
+
+  To complete the flow, click **Save** button on **Your Tariff** page. 
+
+  <Info>Contact [Flatpeak support](https://flatpeak.com/support) if you need sample credentials for an energy provider to complete this step.</Info>
+
+</Step>
+<Step title="Handle Completion">
+
+1. You will receive a [session_complete](/api-reference/zero/connect/complete-a-connect-session) page in the browser.
+2. The customer is redirected to the `callback_uri` set in [create-connect-token](/api-reference/zero/connect/create-a-connect-token) step. Use this to notify your backend.
+3. Call the [exchange-connect-token](/api-reference/zero/connect/exchange-a-connect-token) endpoint to exchange the `connect_token` for a permanent `location_id`, and store it with the customer’s address record in your backend.
+
+</Step>
+<Step title="Subscribe to Lifecycle Webhooks">
+
+  Flatpeak keeps tariff data up to date post-connection. If customer action is needed (e.g. expired password), Flatpeak will generate an events and send it to you via webhook. [Subscribe](/guides/connect/lifecycle) to them to inform users and guide them to re-connect when necessary.
+
+  </Step>
+  <Step title="Allow Configuration Changes">
+
+  To let users review or update their tariffs post-connection, refer to the [Tariff Settings Page](/guides/connect/settings-page) guide to provide UI controls for users to view, reconnect, or adjust their tariff flows—including commodity, export, or grid-fee options.
+
+  </Step>
+</Steps>
+
+### Tip for embedding
+
+When embedding Connect in your app, launch it in a modal or bottom sheet ([iOS](https://developer.apple.com/design/human-interface-guidelines/sheets)/[Android](https://m3.material.io/components/bottom-sheets/guidelines)) to prevent layout issues—especially on devices with notches or cutouts. This keeps the UI clean and ensures no elements are obscured.
+
+<Frame>
+  <img src="/images/modal.png" style={{ width: "250px" }} />
+</Frame>
+
+## Next steps
+
+After connecting the tariff, you can access:
+
+  - Energy [scheduling](/guides/scheduling) endpoints,
+  - Energy [cost reporting](/guides/reporting) endpoints.

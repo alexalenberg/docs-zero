@@ -1,0 +1,286 @@
+---
+title: Heating, Ventilation and Air Conditioning
+sidebarTitle: HVAC system
+description: This guide explains how to use Flatpeak to reduce energy costs for Heat-Pumps, HVAC and Water Heating systems by optimising operation based on electricity prices.
+---
+
+<Frame caption="Without optimisation: 40 kWh → €6.50. With cost/time optimisation: 38 kWh → €3.78">
+  <img
+    src="/images/use-case-hvac.png"
+  />
+</Frame>
+
+## Design
+
+#### To optimise the operation of an HVAC system by energy cost:
+
+Once the customer completes the [Connect flow](/quickstart#2-run-connect-flow), or if you [imported their tariff](/guides/importing-your-data):
+
+1. Use Flatpeak API to find time periods when the energy price is above the daily average.
+2. Pre-heat or pre-cool before those high-cost periods.
+3. Reduce consumption during high-cost periods until either:
+  - the maximum temperature tolerance is reached, or
+  - the energy price falls back down.
+
+#### To display energy cost:
+
+1. Submit consumed energy to the [submit-interval-meter-records](/api-reference/zero/meters/submit-interval-meter-records) endpoint with tariff_type = IMPORT and direction = IMPORT.
+2. Use [calculate-energy-cost-by-time-interval](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) to fetch costs for the IMPORT direction and present them to the customer.
+
+## Implementation
+
+<AccordionGroup>
+
+<Accordion icon="chart-mixed-up-circle-dollar" title="Find periods if high energy price">
+
+<Tabs>
+<Tab title="Using Schedules API">
+
+To detect high-cost periods, use the [schedules-by-price-limit](/api-reference/zero/slots/get-slots-threshold) endpoint.
+- Request a 12 or 24 hour window and set segment=HIGH with relative=0.25 to capture the top 25% periods of high electriciy price.
+- Run this periodically to generate or update the next day’s operating schedule.
+
+<CodeGroup>
+```json Request
+curl --request GET \
+  --url 'https://api.flatpeak.com/slots/threshold/loc_65e42ce4d3b813479b252160 \
+  ?start_time=2023-06-15T00:00:00Z \
+  &end_time=2023-06-16T00:00:00Z \
+  &direction=IMPORT \
+  &segment=HIGH \
+  &relative=0.75' \
+  --header 'Authorization: Bearer <token>'
+```
+```json Response
+{
+  "id": "slt_65e42cdd73e9f861edda35d7",
+  "object": "slot_threshold",
+  "live_mode": true,
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "direction": "IMPORT",
+  "next_update": "2023-06-15T23:00:00Z",
+  "data": [
+    {
+      "start_time": "2023-06-15T08:00:00Z",
+      "end_time": "2023-06-15T09:20:00Z",
+      "tariff": {
+        "rate": 14.998,
+        "confidence": 1
+      }
+    },
+    {
+      "start_time": "2023-06-15T16:30:00Z",
+      "end_time": "2023-06-15T21:15:00Z",
+      "tariff": {
+        "rate": 21.392,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+</Tab>
+<Tab title="Using Raw Tariff Rates API">
+
+You can also calculate high-cost periods yourself by retrieving the full price curve and analysing it in your system.
+- Call the [tariff-rates](/api-reference/zero/tariffs/get-tariff-rates) endpoint for the next 12 or 24 hours.
+- We recommend calling this periodically to generate or update your operating schedule.
+
+<CodeGroup>
+```json Request
+curl --request GET \
+  --url 'https://api.flatpeak.com/tariffs/rates/loc_65e42ce4d3b813479b252160 \
+  ?start_time=2023-06-15T00%3A00%3A00Z \
+  &end_time=2023-06-16T00%3A00%3A00Z \
+  &include_tariff=true
+  &direction=IMPORT' \
+  --header 'Authorization: Bearer <token>'
+```
+```json Response
+{
+  "id": "rts_65e42cdd73e9f861edda35d7",
+  "object": "tariff_rate",
+  "location_id": "loc_65e42ce4d3b813479b252160",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "direction": "IMPORT",
+  "last_updated": "2023-06-15T00:00:00Z",
+  "next_update": "2023-06-15T15:00:00Z",
+  "request": {
+    "include_tariff": true,
+    "direction": "IMPORT",
+    "start_time": "2023-06-15T00:00:00Z",
+    "end_time": "2023-06-16T00:00:00Z"
+  },
+  "data": [
+    {
+      "valid_from": "2023-06-15T00:00:00Z",
+      "valid_to": "2023-06-15T005:30:00Z",
+      "tariff": {
+        "rate": 4.998,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+</Tab>
+</Tabs>
+
+</Accordion>
+
+<Accordion icon="code-compare" title="Program your system">
+Use the data obtained in the previous steps to program your system to minimise energy consumption during high cost periods identified in step 1 and restore energy use during lwo cost periods identified in step 2.
+
+**Actions you may consider:**
+| Asset Type | High Cost | Low Cost | 
+|---|---|---|
+| Space Heating / Heat-Pumps| Lower flow temperature<br/>Widen deadband range<br/>Lower set point temperature<br/>Turn off boost function<br/>Ensure correct weather compensation<br/>|Restore deadband range to normal<br/>Reset flow temperature<br/>Restore set point temperature<br/>Consider pre-heating before high cost periods|
+| Air Conditioning|Increase refrigerant temperature<br/>Widen deadband range<br/>Raise set point temperature<br/>Turn off boost function|Restore deadband range to normal<br/>Reset refrigerant temperature<br/>Restore set point temperature<br/>Consider pre-cooling before high cost periods|
+| Water Heating|Do not heat (ECO mode if must)<br/>Avoid automatically reheating after water use|Heat to target temperature<br/>Perform bacterial heating cycle (if due)|
+
+<Note>Also consider "pre-cooling" or "pre-heating" before high cost periods to maximise savings</Note>
+
+</Accordion>
+
+<Accordion icon="meter" title="Submit energy consumption to Flatpeak">
+Submit electricity meter readings from your system to Flatpeak API:
+
+<Tabs>
+<Tab title="Interval meter records">
+If your system logs meter records as intervals, call the [submit-interval-meter-records](/api-reference/zero/meters/submit-interval-meter-records) endpoint.
+
+<CodeGroup>
+```json Request
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[
+  {
+    "location_id": "loc_641b90b758fb8e6293716e40",
+    "device_id": "dev_65e6d8334c8d715963d99db3",
+    "session_reference_id": "SESSION1234567890",
+    "direction": "IMPORT",
+    "tariff_rate": "IMPORT",
+    "units": "W",
+    "value": 8214,
+    "confidence": 1,
+    "start_time": "2023-06-16T01:00:00Z",
+    "end_time": "2023-06-16T01:30:00Z"
+  }
+]'
+```
+```json Response
+{
+  "id": "bat_65e42b7827c0526548432b9f",
+  "object": "meter_batch",
+  "records_submitted": 1,
+  "records_accepted": 1,
+  "records_processed": 1
+}
+```
+</CodeGroup>
+
+</Tab>
+<Tab title="Cumulative meter records">
+If your system logs meter records as cumulative values, call the [submit-cumulative-meter-records](/api-reference/zero/meters/submit-cumulative-meter-records) API endpoint.
+
+<CodeGroup>
+```json Request
+curl --request PUT \
+  --url https://api.flatpeak.com/cumulative/epoch \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "device_id": "dev_65e6d8334c8d715963d99db3",
+  "session_reference_id": "SESSION1234567890",
+  "direction": "IMPORT",
+  "tariff_rate": "IMPORT",
+  "units": "WH",
+  "data": [
+    {
+      "time": 1721991392,
+      "value": 1553
+    }
+  ]
+}'
+```
+```json Response
+{
+  "id": "bat_65e42b7827c0526548432b9f",
+  "object": "meter_batch",
+  "records_submitted": 1,
+  "records_accepted": 1,
+  "records_processed": 1
+}
+```
+</CodeGroup>
+
+</Tab>
+</Tabs>
+<Info>If your system can differentiate between grid-supplied and locally generated energy (e.g. solar), set "tariff_rate": "LOCAL" when submitting records for solar generation. This tells Flatpeak to treat the energy as zero-cost during cost calculations.</Info>
+</Accordion>
+
+<Accordion icon="sack-dollar" title="Display energy cost to your customer">
+
+To display the energy cost used by your system, call the [calculate-energy-cost-by-time-interval](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) endpoint.
+
+You can request:
+
+- Raw (unaggregated) costs for custom processing, or
+- Pre-aggregated totals by DAY or MONTH.
+
+<CodeGroup>
+```json Request
+curl --request POST \
+  --url 'https://api.flatpeak.com/costs/interval/dev_65e6d8334c8d715963d99db3 \
+  ?aggregation=MONTH \
+  &direction=IMPORT \
+  &include_tariff=true' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "start_time": "2023-11-07T05:31:56Z",
+  "end_time": "2023-12-07T05:31:56Z"
+}'
+```
+```json Response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "dev_65e6d8334c8d715963d99db3",
+  "live_mode": true,
+  "direction": "IMPORT",
+  "location_timezone": "Europe/London",
+  "currency_code": "EUR",
+  "energy_units": "WH"
+  "data": [
+    {
+      "start_time": "2023-11-07T05:31:56Z",
+      "end_time": "2023-12-07T05:31:56Z",
+      "energy": {
+        "value": 10284
+      },
+      "tariff": {
+        "value": 928.372,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+The `tariff.value` in the response is the total energy cost — ready to display directly to the customer.
+
+</Accordion>
+
+</AccordionGroup>

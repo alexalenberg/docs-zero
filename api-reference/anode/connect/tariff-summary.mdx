@@ -1,0 +1,127 @@
+---
+title: 'Tariff Summary'
+icon: 'chart-simple'
+sidebarTitle: "12. Tariff summary"
+description: Shows tariff summary and connection controls.
+tag: "Upd"
+---
+
+Once the tariff is successfully discovered, Connect returns this final page.
+
+**Page actions explained**:
+
+  | Action         | Result                                              |
+  | :------------- | :-------------------------------------------------- |
+  | `EDIT`         | Restarts the flow from the Provider Selection page. |
+  | `DISCONNECT`   | Disconnects the tariff and completes the session.   |
+  | `WRONG_TARIFF` | Report incorrect tariff to Flatpeak. Not available if already reported. |
+  | `CLOSE`        | Returns `callback_url` you specified when creating the Connect token |
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/12-tariff-summary-all.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_summary",
+  "direction": "IMPORT",
+  "type": "COMMODITY",
+  "live_mode": false,
+  "actions": [
+    "WRONG_TARIFF",
+    "EDIT",
+    "DISCONNECT",
+    "CLOSE",
+    "BACK"
+  ],
+  "data": {
+    "connection_type": "MARKET",
+    "currency_code": "GBP",
+    "market_rates_source": true,
+    "provider": {
+      "id": "prv_65de48b2977276d02acdb481",
+      "display_name": "British Gas",
+      "logo_url": "https://s.flatpeak.com/7276d02acdb481.png"
+    },
+    "tariff": {
+      "status": "CONNECTED",
+      "name": "Flex Next Go",
+      "structure_type": "MARKET",
+      "contract_start_date": "2023-06-15T00:00:00+02:00",
+      "contract_end_date": "2024-06-15T00:00:00+02:00",
+      "contract_term_type": "FIXED",
+      "tiered": false
+    },
+    "rates": {
+      "yesterday": [],
+      "today": [
+        {
+          "valid_from": "2024-02-01T00:00:00+02:00",
+          "valid_to": "2024-02-01T22:00:00+02:00",
+          "tariff": {
+            "cost": 0.12,
+            "confidence": 1
+          }
+        },
+        {
+          "valid_from": "2024-02-01T22:00:00+02:00",
+          "valid_to": "2024-02-01T00:00:00+02:00",
+          "tariff": {
+            "cost": 0.09,
+            "confidence": 1
+          }
+        }
+      ],
+      "tomorrow": [
+        {
+          "valid_from": "2024-02-02T00:00:00+02:00",
+          "valid_to": "2024-02-02T06:00:00+02:00",
+          "tariff": {
+            "cost": 0.09,
+            "confidence": 1
+          }
+        },
+        {
+          "valid_from": "2024-02-02T06:00:00+02:00",
+          "valid_to": "2024-02-03T00:00:00+02:00",
+          "tariff": {
+            "cost": 0.12,
+            "confidence": 1
+          }
+        }
+      ]
+    }
+  }
+}
+```
+```json Your POST to Connect (action)
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_summary",
+  "action": "BACK"
+}'
+```
+</CodeGroup>
+
+**Validation errors explained**:
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+  | Error Code         | Error Description                     |
+  | ------------------ | ------------------------------------- |
+  | `action_missing`   | Action parameter is required.         |
+  | `action_invalid`   | Action parameter XX is not supported. |
+  | `data_json_invalid`| Data does not conform to the JSON schema.   |
+
+<Note>Note, time is returned in RFC3339 format with offset. i.e. 2024-06-15T03:12:00+02:00</Note>
+
+</Tab>
+</Tabs>

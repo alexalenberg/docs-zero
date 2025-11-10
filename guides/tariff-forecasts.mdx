@@ -1,0 +1,193 @@
+---
+title: Tariff forecasts
+sidebarTitle: "Tariff forecasts"
+mode: "wide"
+tag: "New"
+---
+
+<Warning>
+This feature is in limited Beta. [Contact support](https://flatpeak.com/support) for early access.
+</Warning>
+
+Sometimes you need to know the energy price *before* it’s available.  
+
+In most European markets, day-ahead electricity prices are published around 11:00 a.m. — which means your systems may not always have a full 24-hour forecast in time for when you run your planning.
+
+Gaps or late arrival of data may also be caused by energy provider system outages.
+
+To ensure uninterrupted service, Flatpeak uses **machine learning and AI** to:
+
+- Predict future prices  
+- Populate historical gaps  
+
+When this occurs:
+
+- The API returns forecasted values with `confidence < 1.0`  
+- Once the upstream data is available, Flatpeak **back-fills** with actual data and updates the value to `1.0`
+
+This means your system can always operate — even if the market data isn’t there yet. Or there is a connection issue with your customer's provider systems.
+
+## How tariff forecasts work
+
+Flatpeak’s forecasting logic adapts based on the tariff type and the time window in question. Below is a simplified explanation.
+
+### 1. If there are gaps in data
+
+- **`FIXED` / `TIME_OF_DAY`**  
+  Missing periods are interpolated from surrounding values, using the lowest confidence of the adjacent time blocks.
+
+- **`MARKET` / `DYNAMIC`**  
+  Gaps are filled using extended historical data for the same period taking into account other factors such as weather.
+
+### 2. If future data is not yet available
+
+- **`FIXED` / `TIME_OF_DAY`**  
+Flatpeak extrapolates the known pricing pattern into the future. Forecasts start at `0.8` confidence and decay by `0.2` every 90 days, to a floor of `0.2`.
+
+- **`MARKET` / `DYNAMIC`**  
+Predictions use a blend of market prices, provider surcharges, weather forecasts and historical patterns.
+
+### Historic performance
+
+Expand the sections below to explore Flatpeak forecast accuracy vs actual published market prices, by country (Europe). MAE = Mean Absolute Error.
+
+<AccordionGroup defaultOpen="true%">
+<Accordion title="Austria — MAE 10.98%">
+  <img src="/images/forecasts/AT.png" />
+</Accordion>
+<Accordion title="Belgium — MAE 9.91%">
+  <img src="/images/forecasts/BE.png" />
+</Accordion>
+<Accordion title="Bulgaria — MAE 18.67%">
+  <img src="/images/forecasts/BG.png" />
+</Accordion>
+<Accordion title="Switzerland — MAE 8.79%">
+  <img src="/images/forecasts/CH.png" />
+</Accordion>
+<Accordion title="Czech Republic — MAE 12.20%">
+  <img src="/images/forecasts/SZ.png" />
+</Accordion>
+<Accordion title="Germany — MAE 10.26%">
+  <img src="/images/forecasts/DE.png" />
+</Accordion>
+<Accordion title="Denmark (DK1) — MAE 11.81%">
+  <img src="/images/forecasts/DK1.png" />
+</Accordion>
+<Accordion title="Denmark (DK2) — MAE 12.57%">
+  <img src="/images/forecasts/DK2.png" />
+</Accordion>
+<Accordion title="Estonia — MAE 26.45%">
+  <img src="/images/forecasts/EE.png" />
+</Accordion>
+<Accordion title="Spain — MAE 10.12%">
+  <img src="/images/forecasts/ES.png" />
+</Accordion>
+<Accordion title="Finland — MAE 20.84%">
+  <img src="/images/forecasts/FI.png" />
+</Accordion>
+<Accordion title="France — MAE 11.05%">
+  <img src="/images/forecasts/FR.png" />
+</Accordion>
+<Accordion title="Greece — MAE 16.40%">
+  <img src="/images/forecasts/GR.png" />
+</Accordion>
+<Accordion title="Croatia — MAE 14.20%">
+  <img src="/images/forecasts/HR.png" />
+</Accordion>
+<Accordion title="Hungary — MAE 17.76%">
+  <img src="/images/forecasts/HU.png" />
+</Accordion>
+<Accordion title="Ireland — MAE 16.50%">
+  <img src="/images/forecasts/IE.png" />
+</Accordion>
+<Accordion title="Italy (ALL) — MAE 7.78%">
+  <img src="/images/forecasts/IT.png" />
+</Accordion>
+<Accordion title="Italy (Centre-North) — MAE 8.47%">
+  <img src="/images/forecasts/IT-CN.png" />
+</Accordion>
+<Accordion title="Italy (Centre-South) — MAE 8.61%">
+  <img src="/images/forecasts/IT-CS.png" />
+</Accordion>
+<Accordion title="Italy (North) — MAE 8.17%">
+  <img src="/images/forecasts/IT-N.png" />
+</Accordion>
+<Accordion title="Italy (Sardinia) — MAE 11.77%">
+  <img src="/images/forecasts/IT-Sardinia.png" />
+</Accordion>
+<Accordion title="Italy (Sicilly) — MAE 10.96%">
+  <img src="/images/forecasts/IT-Sicily.png" />
+</Accordion>
+<Accordion title="Italy (South) — MAE 8.95%">
+  <img src="/images/forecasts/IT-S.png" />
+</Accordion>
+<Accordion title="Lithuania — MAE 24.68%">
+  <img src="/images/forecasts/LT.png" />
+</Accordion>
+<Accordion title="Latvia — MAE 24.53%">
+  <img src="/images/forecasts/LV.png" />
+</Accordion>
+<Accordion title="Netherlands — MAE 10.69%">
+  <img src="/images/forecasts/NL.png" />
+</Accordion>
+<Accordion title="Norway (NO1) — MAE 8.76%">
+  <img src="/images/forecasts/NO-NO1.png" />
+</Accordion>
+<Accordion title="Norway (NO2) — MAE 8.81%">
+  <img src="/images/forecasts/NO-NO2.png" />
+</Accordion>
+<Accordion title="Norway (NO3) — MAE 6.92%">
+  <img src="/images/forecasts/NO-NO3.png" />
+</Accordion>
+<Accordion title="Norway (NO4) — MAE 5.74%">
+  <img src="/images/forecasts/NO-NO4.png" />
+</Accordion>
+<Accordion title="Norway (NO5) — MAE 7.77%">
+  <img src="/images/forecasts/NO-NO5.png" />
+</Accordion>
+<Accordion title="Poland — MAE 12.81%">
+  <img src="/images/forecasts/PL.png" />
+</Accordion>
+<Accordion title="Portugal — MAE 10.36%">
+  <img src="/images/forecasts/PT.png" />
+</Accordion>
+<Accordion title="Romaina — MAE 19.10%">
+  <img src="/images/forecasts/RO.png" />
+</Accordion>
+<Accordion title="Romaina — MAE 19.10%">
+  <img src="/images/forecasts/RO.png" />
+</Accordion>
+<Accordion title="Serbia — MAE 14.98%">
+  <img src="/images/forecasts/RS.png" />
+</Accordion>
+<Accordion title="Sweden (SE1) — MAE 6.70%">
+  <img src="/images/forecasts/SE-SE1.png" />
+</Accordion>
+<Accordion title="Sweden (SE2) — MAE 6.75%">
+  <img src="/images/forecasts/SE-SE2.png" />
+</Accordion>
+<Accordion title="Sweden (SE2) — MAE 6.75%">
+  <img src="/images/forecasts/SE-SE2.png" />
+</Accordion>
+<Accordion title="Sweden (SE3) — MAE 10.02%">
+  <img src="/images/forecasts/SE-SE3.png" />
+</Accordion>
+<Accordion title="Sweden (SE4) — MAE 13.44%">
+  <img src="/images/forecasts/SE-SE4.png" />
+</Accordion>
+<Accordion title="Slovenia — MAE 13.44%">
+  <img src="/images/forecasts/SI.png" />
+</Accordion>
+<Accordion title="Slovakia — MAE 14.73%">
+  <img src="/images/forecasts/SK.png" />
+</Accordion>
+<Accordion title="United Kingdom — MAE 7.18%">
+  <img src="/images/forecasts/UK.png" />
+</Accordion>
+</AccordionGroup>
+
+Forecasts for the US, Australia, and New Zealand are coming in Q1 2026.
+
+<Tip>
+Need more detail on Flatpeak’s energy price data or forecasts? [Get in touch with support](https://flatpeak.com/support).
+</Tip>

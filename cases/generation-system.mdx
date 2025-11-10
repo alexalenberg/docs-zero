@@ -1,0 +1,174 @@
+---
+title: PV (solar) system
+sidebarTitle: PV (solar) system
+description: This guide shows how to utilise Flatpeak to calculate and report cost savings and export revenue for systems that generate energy, such as solar photovoltaic (PV) installations or wind turbines.
+---
+
+<Frame>
+  <img
+    src="/images/use-case-generation.png" style={{ width: "250px" }}
+  />
+</Frame>
+
+## Design
+
+Once the customer completes the [Connect flow](/quickstart#2-run-connect-flow), or if you [imported their tariff](/guides/importing-your-data):
+
+#### To calculate the cost-benefit of your system's operation:
+
+1. Supply your customer's premises when your system generates (supplied energy).
+2. Export surplus energy to the grid.
+
+#### To determine the savings and earnings achieved by your system:
+
+1. Log supplied energy to [meter-records](/api-reference/zero/meters/submit-interval-meter-records) API under the IMPORT tariff.
+2. Log exported energy to the [meter-records](/api-reference/zero/meters/submit-interval-meter-records) API under the EXPORT tariff
+3. When you want to display savings and earnings, call the [cost-calculation](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) API to get the value of energy your system has supplied and exported.
+
+## Implementation
+
+<AccordionGroup>
+<Accordion icon="meter" title="Log supplied energy">
+When your system supplies the energy it generates to your customer's premises, log it *as if it were supplied from the grid*. This is so it can be priced at the value of the grid import tariff at the time, enabling you to demonstrate the savings your system creates.
+
+<Note>
+Where monitored, exported energy to the grid (i.e. not consumed by the property first) should first be substracted from the generation readings. This enables the accurate calculation of both value streams, the value of avoided grid energy and the value of payments received for energy exported to the grid.
+</Note>
+
+Submit meter records from your system to [meter-records](/guides/reporting/aggregated) API at device-level, setting `direction=EXPORT` and `tariff_rate=IMPORT`:
+
+```json
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[{
+  "start_time": "2024-08-01T08:00:00Z",
+  "end_time": "2024-08-01T09:00:00Z",
+  "device_id": "dev_65e6d8334c8d715963d99db3",
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "direction": "EXPORT",
+  "tariff_rate": "IMPORT",
+  "units": "WH",
+  "value": 2125
+}]'
+```
+
+</Accordion>
+<Accordion icon="meter" title="Log exported energy (where monitored)">
+When your system exports energy to the grid, log it using the export tariff. To make this measurement, you will place a CT clamp or Meter on the property power feed in the configuration that measures exported energy (export CT clamp / Meter).
+
+1. Log export energy to [meter-records](/guides/reporting/aggregated) API, at location-level (i.e. with no `device_id`), setting `direction=EXPORT` and `tariff_rate=EXPORT`.
+```json Request
+curl --request PUT \
+  --url https://api.flatpeak.com/meters/interval \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '[{
+  "start_time": "2024-08-01T08:00:00Z",
+  "end_time": "2024-08-01T09:00:00Z",
+  "location_id": "loc_641b90b758fb8e6293716e40",
+  "direction": "EXPORT",
+  "tariff_rate": "EXPORT",
+  "units": "WH",
+  "value": 1324
+}]'
+```
+</Accordion>
+<Accordion icon="sack-dollar" title="Display savings and earnings">
+
+**Step 1 - Get monetary value of supplied energy:**
+
+Call the [cost-calculation](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) API and make request on device-level setting `direction=EXPORT`, `tariff_rate=IMPORT` and `aggregation=DAY`. The response will include the monetary value of energy that your system supplied to your customer's premises.
+<CodeGroup>
+```json Request
+curl --request POST \
+  --url 'https://api.flatpeak.com/costs/interval/dev_65e6d8334c8d715963d99db3 \
+  ?direction=EXPORT' \
+  ?aggregation=DAY' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "start_time": "2024-08-01T00:00:00Z",
+  "end_time": "2024-08-01T23:59:59Z"
+}'
+```
+```json Response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "dev_65e6d8334c8d715963d99db3",
+  "direction": "EXPORT",
+  "tariff_rate": "IMPORT",
+  "currency_code": "EUR",
+  "data": [
+    {
+      "start_time": "2024-08-01T00:00:00Z",
+      "end_time": "2024-08-01T23:59:59Z",
+      "energy": {
+        "value": 24500
+      },
+      "tariff": {
+        "value": 6.8612,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+ **Step 2 - Get monetary value of exported energy:**
+
+Next, call the [cost-calculation](/api-reference/zero/costs/calculate-energy-cost-by-time-interval) API and make a request on the location-level, covering the same time period and using the same aggregation value. The response will include the monetary value of energy your system exported to the grid.
+
+ <CodeGroup>
+```json Request
+curl --request POST \
+  --url 'https://api.flatpeak.com/costs/interval/loc_641b90b758fb8e6293716e40 \
+  ?direction=EXPORT' \
+  ?aggregation=DAY' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "start_time": "2024-08-01T00:00:00Z",
+    "end_time": "2024-08-01T23:59:59Z"
+}'
+```
+```json Response
+{
+  "id": "ecs_65ea3fb185c1541f247c251e",
+  "object": "energy_cost",
+  "object_id": "loc_641b90b758fb8e6293716e40",
+  "direction": "EXPORT",
+  "tariff_rate": "EXPORT",
+  "currency_code": "EUR",
+  "data": [
+    {
+      "start_time": "2024-08-01T00:00:00Z",
+      "end_time": "2024-08-01T23:59:59Z",
+      "energy": {
+        "value": 16890
+      },
+      "tariff": {
+        "value": 2.0268,
+        "confidence": 1
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+
+**Step 3 - Calculate savings and earnings**:
+
+The sum of the `tariff.value` figures in the two above requests will represent savings plus earnings achieved by your system.
+
+The example below covers a day period and works out as follows:
+
+- Supplied 24.5KWh of energy at total value of €6.86;
+- Exported 16.9KWh of energy at total value of €2.03;
+- Calculate savings as `€6.86` grid costs avoid, plus export revenue of `€2.03` making a saving of **€8.89 savings**.
+
+</Accordion>
+</AccordionGroup>

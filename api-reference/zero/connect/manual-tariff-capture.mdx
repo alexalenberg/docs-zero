@@ -1,0 +1,138 @@
+---
+title: 'Manual tariff capture'
+icon: 'file-pen'
+sidebarTitle: "6. Manual tariff capture"
+description: Customer enters their tariff manually.
+---
+
+Connect requests you to provide a manual tariff input screen for `FIXED` or `TIME_OF_DAY` tariff structure.
+
+<Steps>
+
+<Step title="`FIXED` tariff rate">
+This page enables the customer to enter their tariff when they are on a fixed (flat) rate.
+<Tabs>
+<Tab title="Preview">
+
+<Frame>
+  <img src="/images/08-fixed-rate-tariff.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+        <Note>`cost` shall be returned in *large* currency units.</Note>
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_fixed_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+    "currency_code": "GBP",
+    "provider": {
+      "id": "prv_65de30082a7c56d2297cbe3d",
+      "display_name": "OVO Energy",
+      "logo_url": "https://s.flatpeak.com/c56d2297cbe3d.png"
+    },
+    "cost": 0
+  }
+}
+```
+```json Your POST to Connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_fixed_capture",
+  "data": {
+    "cost": 24
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                 | Error Description                             |
+| -------------------------- | --------------------------------------------- |
+| `cost_value_zero`       | Tariff rate (cost) cannot be zero.            |
+| `cost_value_negative`   | Tariff rate (cost) must be greater than zero. |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>
+</Step>
+
+<Step title="`TIME_OF_DAY` tariff rate">
+This page lets the customer enter their tariff if it changes throughout the day.
+
+<Tabs>
+<Tab title="Preview">
+<Frame>
+  <img src="/images/09-day-night-tariff.png" style={{ width: "200px" }} />
+</Frame>
+</Tab>
+<Tab title="Code">
+<Note>`hours.valid_from` and `hours.valid_to` shall be returned as entered. `hours.cost` shall be returned in *large* currency units.</Note>
+<CodeGroup>
+```json Connect response
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_tod_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+    "currency_code": "GBP",
+    "provider": {
+      "id": "prv_65de3167136dda41ceba3c2f",
+      "display_name": "EDF",
+      "logo_url": "https://s.flatpeak.com/dda41ceba3c2f.png"
+    },
+    "hours": [
+      {
+        "cost": 0,
+        "valid_from": "00:00:00",
+        "valid_to": "00:00:00"
+      }
+    ]
+  }
+}
+```
+```json Your POST to Connect highlight={15-42}
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "rate_tod_capture",
+  "data": {
+    "hours": [
+      {
+        "cost": 0.12,
+        "valid_from": "00:00:00",
+        "valid_to": "00:00:00"
+      }
+    ]
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code                     | Error Description                          |
+| ------------------------------ | ------------------------------------------ |
+| `cost_value_zero`              | Tariff rate (cost) cannot be zero.            |
+| `cost_value_negative`          | Tariff rate (cost) must be greater than zero. |
+| `valid_from_invalid`           | Time period start must be in format HH:mm:ss. |
+| `valid_to_invalid`             | Time period end must be in format HH:mm:ss.   |
+| `gap_in_time_period`           | Gap between XX and YY is found in the time period.|
+| `incomplete_time_period`       | Time period must cover the full 24 hours.         |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>
+</Step>
+
+</Steps>

@@ -1,0 +1,61 @@
+---
+title: 'Tariff name capture (input)'
+icon: 'input-text'
+sidebarTitle: "8. Tariff name capture"
+description: Customer enters their market rate surcharge.
+---
+
+This page is returned when Connect cannot detect your customer's tariff name. This normally happens when they enter the tariff manually.
+
+<Tabs>
+  <Tab title="Preview">
+
+<Frame>
+  <img src="/images/05-name-your-tariff.png" style={{ width: "200px" }} />
+</Frame>
+  </Tab>
+  <Tab title="Code">
+<CodeGroup>
+```json Connect request
+{
+  "connect_token": "cot_6587fa4362341be5b524de3b",
+  "route": "tariff_name_capture",
+  "direction": "IMPORT",
+  "live_mode": false,
+  "data": {
+    "provider": {
+      "id": "prv_65b78bbdd8e83b06a60e38c2",
+      "display_name": "British Gas",
+      "logo_url": "https://s.flatpeak.com/8e83b06a60e38c2.png"
+    },
+    "tariff": {
+      "name": ""
+    }
+  }
+}
+```
+```json Your POST to connect
+curl --request POST \
+  --url https://connect.flatpeak.com \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "connect_token": "cot_66f3b3ce79623c504678cd0a",
+  "route": "tariff_name_capture",
+  "data": {
+    "tariff": {
+      "name": "Super Cheap Energy 2008"
+    }
+  }
+}'
+```
+</CodeGroup>
+
+When you POST the response, Connect may return any of these [validation errors](/guides/system/errors):
+
+| Error Code              | Error Description                    |
+| ----------------------- | ------------------------------------ |
+| `tariff_name_missing`   | Tariff name is required.             |
+| `data_json_invalid`    | Data does not conform to the JSON schema.   |
+
+</Tab>
+</Tabs>

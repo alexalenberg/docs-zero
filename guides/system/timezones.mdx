@@ -1,0 +1,139 @@
+---
+title: Timezones & Daylight Saving Time
+sidebarTitle: Timezones & DST
+---
+
+Flatpeak is **timezone-aware by design**.
+
+All API time handling is based on UTC internally. System-generated timestamps are always returned in **UTC**. However, the API accepts datetime inputs in **any timezone** and will respond in the **same** timezone.
+
+## Use RFC3339 format
+
+All requests must use RFC 3339 timestamps for start_time and end_time. You can send:
+
+- **Zulu (UTC) format**: `2025-06-15T00:00:00Z`
+- **Offset format**: `2025-06-15T00:00:00+10:00`
+
+These represent different moments in time.
+
+**Examples**:
+
+- `2025-06-15T00:00:00Z` → UTC
+- `2025-06-15T00:00:00+10:00` → UTC+10
+
+## Integration Strategy: Choose One Approach
+
+Before integrating, choose a consistent approach to time handling:
+
+- **UTC-first**: Send and process all timestamps in UTC. Convert to local time in your system if needed.
+- **Local-first**: Always include the correct local timezone offset in API requests.
+
+## Example
+
+Requesting [raw tariff rates](/api-reference/zero/tariffs/get-tariff-rates) in UTC vs Local Time for a location in Sydney, Australia
+
+<Tabs>
+<Tab title="UTC Example">
+
+<CodeGroup>
+```json5 Request example
+curl --request GET \
+  --header 'Authorization: Bearer <token>'
+  --url 'https://api.flatpeak.com/tariffs/rates/loc_65e42ce4d3b813479b252160
+  ?direction=IMPORT
+  &start_time=2025-09-15T10:00:00Z
+  &end_time=2025-09-16T10:00:00Z'
+```
+```json5 Response example
+{
+    "id": "rts_68ba8186d1926f4da39601b5",
+    "object": "tariff_rate",
+    "location_id": "loc_65e42ce4d3b813479b252160",
+    "location_timezone": "Australia/Sydney",
+    "currency_code": "AUD",
+    "data":
+    [
+        {
+            "valid_from": "2025-09-15T10:00:00Z",
+            "valid_to": "2025-09-16T10:00:00Z",
+            "tariff":
+            {
+                "rate": 0.014
+                "confidence": 1,
+            }
+        }
+    ]
+}
+```
+</CodeGroup>
+
+</Tab>
+<Tab title="Local time example">
+
+<CodeGroup>
+```json5 Request example
+curl --request GET \
+  --header 'Authorization: Bearer <token>'
+  --url 'https://api.flatpeak.com/tariffs/rates/loc_65e42ce4d3b813479b252160 \
+  ?direction=IMPORT \
+  &start_time=2025-09-15T00:00:00+10:00 \
+  &end_time=2025-09-16T00:00:00+10:00'
+```
+```json5 Response example
+{
+    "id": "rts_68ba801460cf0890ccb24453",
+    "object": "tariff_rate",
+    "location_id": "loc_65e42ce4d3b813479b252160",
+    "location_timezone": "Australia/Sydney",
+    "currency_code": "AUD",
+    "data":
+    [
+        {
+            "valid_from": "2025-09-15T00:00:00+10:00",
+            "valid_to": "2025-09-16T00:00:00+10:00",
+            "tariff":
+            {
+                "rate": 0.014,
+                "confidence": 1,
+            }
+        }
+    ]
+}
+```
+</CodeGroup>
+
+</Tab>
+</Tabs>
+
+## Handling Daylight Saving Time (DST)
+
+If you are using offsets and your request crosses DST transitions, ensure that both `start_time` and `end_time` reflect the correct time offset for the location.
+
+If different time offsets are specified, `end_time` takes precedence. The `valid_from` and `valid_to` times in the response will use the `end_time` offset.
+
+<CodeGroup>
+```json5 Example Request highlight={3}
+{
+  request: {
+    start_time: "2025-03-30T00:00:00+01:00",
+    end_time: "2025-03-30T04:00:00+02:00",
+  },
+}
+```
+
+```json5 Example Response highlight={4}
+{
+  data: [
+    {
+      valid_from: "2025-03-30T01:00:00+02:00",
+      valid_to: "2025-03-30T04:00:00+02:00",
+      tariff: {
+        confidence: 1,
+        rate: 0.02,
+      }
+    }
+  ]
+}
+```
+</CodeGroup>
+The example above shows how Flatpeak aligns the returned intervals to the `end_time` offset.
